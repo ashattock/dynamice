@@ -33,6 +33,11 @@ set_options = function(do_step = NA) {
 
   # Years to analyse
   o$analysis_years = 1980 : 2024
+  
+  # ---- Data settings ---
+  
+  # Force re-construct coverage data
+  o$reload_coverage = FALSE
 
   # ---- Plotting flags ----
 
