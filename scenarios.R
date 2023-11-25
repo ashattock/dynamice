@@ -9,38 +9,6 @@ run_scenarios = function() {
   
   message("* Running vaccine scenarios")
   
-  # ---- Load data ----
-  
-  message (" - Loading data")
-  
-  # Load all data
-  data = load_data()
-  
-  # add data for country-specific age at vaccination
-  # https://immunizationdata.who.int/pages/schedule-by-disease/measles.html
-  # input monthly age and then covert to weekly age for dynaMICE structure
-  data_vage <- data.table(
-    country = o$countries,
-    mcv1 = ceiling (c(10.5,  9, 9, 9, 8,
-                      9,  9, 9, 9, 9,
-                      9, 12, 9, 9)/12*52),
-    mcv2 = ceiling (c(20,   15,   18, 15, 18,
-                      13.5, 16.5, 16.5, 15, 15,
-                      16.5,   72,   15, 16.5)/12*52))
-  # adjust to yearly age for those >= 3 years old
-  data_vage[mcv2 > 52*3, mcv2 := 52*3 + floor(mcv2/52-2)]
-  
-  # update timeliness data for countries not giving MCV1 to 39 week old (9 months)
-  for (ictry in data_vage[mcv1 != 39, country]) {
-    c_age <- data_vage[country == ictry, mcv1]
-    data$timeliness[country == ictry & !is.na(age), timeliness := ifelse (age < c_age, 0, 1)]
-  }
-  
-  # assume a fixed R0 for the central run
-  # median R0 for least developed countries, vaccine era, from Guerra et al. (2017)
-  if (!is.na(o$fix_r0))
-    data$r0[country %in% o$countries, r0 := o$fix_r0]
-  
   # ---- Configure scenarios ----
   
   message (" - Configuring scenarios")
@@ -111,12 +79,8 @@ run_scenarios = function() {
       # run model and estimate cases
       burden_estimate_file <- runScenario_rcpp (
         scenario_name          = scenario_name,
-        save_scenario          = scenario_number,
-        log_name               = var$log_name,
-        vaccination            = set_vaccination [index],
-        using_sia              = set_sia         [index],
-        sim_years              = 1980:2020, 
-        data                   = data)
+        vaccination            = set_vaccination[index],
+        using_sia              = set_sia[index])
       
       browser()
       
@@ -132,9 +96,7 @@ run_scenarios = function() {
         log_name                   = var$log_name,
         vaccination                = set_vaccination [index],
         using_sia                  = set_sia         [index],
-        folder_date                = "20230401",
-        sim_years                  = 1980:2020, 
-        data                       = data)
+        folder_date                = "20230401")
     }
     
     browser()
@@ -167,13 +129,9 @@ run_scenarios = function() {
       
       # run model and estimate cases
       burden_estimate_file <- runScenario_rcpp (
-        scenario_name              = scenario_name,
-        save_scenario              = scenario_number,
-        log_name                   = var$log_name,
-        vaccination                = set_vaccination [index],
-        using_sia                  = set_sia [index],
-        sim_years                  = 1980:2020,
-        data                       = data)
+        scenario_name = scenario_name,
+        vaccination   = set_vaccination[index],
+        using_sia     = set_sia[index])
       
       # separately estimate deaths
       burden_estimate_file <- paste0 ("central_burden_estimate_",
@@ -186,9 +144,7 @@ run_scenarios = function() {
         log_name                   = var$log_name,
         vaccination                = set_vaccination [index],
         using_sia                  = set_sia         [index],
-        folder_date                = "20230401",
-        sim_years                  = 1980:2020, 
-        data                       = data)
+        folder_date                = "20230401")
       
       # rename file
       file.rename (from = paste0(o$pth$central, burden_estimate_file),
@@ -206,31 +162,5 @@ run_scenarios = function() {
   dir.create (paste0 ("previous_res/20230401/siareach_2/senanl_r0"))
   file.rename (from = paste0(o$pth$central, res_files),
                to = paste0("previous_res/20230401/siareach_2/senanl_r0/", res_files))
-}
-
-# ---------------------------------------------------------
-# Load all data
-# ---------------------------------------------------------
-load_data = function() {
-  
-  # TODO: Better to do this for one country at a time?
-  
-  # Initiate data list
-  data = list()
-  
-  # All data rds files in data directory
-  all_files = list.files(o$pth$data, pattern = ".+\\.rds$")
-  
-  # Loop through files
-  for (file in all_files) {
-    
-    # Shorthand reference for this data
-    ref = str_remove_all(file, "(^data_|.rds$)")
-    
-    # Load data and store in list
-    data[[ref]] = readRDS(paste0(o$pth$data, file))
-  }
-  
-  return(data)
 }
 

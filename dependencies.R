@@ -34,7 +34,7 @@ packages = c(
   "tidyverse",      # Includes ggplot2, dplyr, tidyr (www.tidyverse.org/packages/)
   "data.table",     # Next generation dataframes
   "Rcpp",           # C++ integration
-  # "gsubfn",         # Output multiple variables from functions
+  "gsubfn",         # Output multiple variables from functions
   "magrittr",       # Additional pipe operators, such as %<>%
   # "rlist",          # List-related operation functions
   "wrapr",          # Convenience functions (eg qc)

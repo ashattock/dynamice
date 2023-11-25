@@ -2,8 +2,4 @@
 .Rhistory
 .RData
 .Ruserdata
-outcome/
-test_log
-central_burden_estimate/
-previous_res/
-supp/
+output*

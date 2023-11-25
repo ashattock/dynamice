@@ -2,123 +2,23 @@
 # main functions for running the DynaMICE model based on Rcpp files
 # update: 2022/01/20
 
-# ------------------------------------------------------------------------------
-#' Run the Rcpp measles model for a selected vaccination strategy
-#'
-#' A function that executes the Rcpp measles model under a selected vaccination
-#' scenario, including a pre-specified set of countries.
-# ------------------------------------------------------------------------------
-#' @param scenario_name Name of the vaccination scenario selected or being
-#' analysed.
-#' @param save_scenario A folder name for saving results from a selected
-#' scenario, denoted by a two-digit number. e.g. "scenario08".
-#' @param log_name A file name for keeping a log.
-#' @param vaccination A numeric indicator that determines vaccination programmes
-#'  for children: 0 - No vaccination, 1 - Only MCV1, and 2 - MCV1 and MCV2.
-#' @param using_sia A numeric indicator that determines whether supplementary
-#' immunisation activities (SIAs) are implemented and how SIAs are distributed
-#' between zero-dose and already-vaccinated populations: 0 - no SIA, 1 - SIAs
-#' based on a weighted logistic function fitted with Portnoy's data, and 2 -
-#' SIAs based on an assumption that 7.7% of the population are never reached by
-#' vaccination.
-#' @param sim_years A numeric vector containing calendar years included for model
-#'  simulation.
-#'
-#' @importFrom foreach %dopar% %:% foreach
-#' @import data.table
-#'
-#' @examples
-#' \dontrun{
-#' runScenario_rcpp (
-#'   scenario_name              = "campaign-only-default",
-#'   save_scenario               = scenario_number,
-#'   log_name                   = "test_log",
-#'   vaccination                = 0,
-#'   using_sia                  = 1
-#'   sim_years                  = 1980:2100
-#'   )
-#'   }
+
 runScenario_rcpp <- function (
     scenario_name,
-    save_scenario,
-    log_name,
     vaccination,            # Whether children are vaccinated. 0: No vaccination; 1: Only MCV1; 2: MCV1 and MCV2
-    using_sia,              # Whether supplementary immunization campaigns are used. 0: no SIA; 1: with SIA  (Portnoy), 2: with SIA (7.7%)
-    sim_years,              # calendar years for simulation
-    data
-) {
-  
-  # --------------------------------------------------------------------------
-  # define global parameters
-  # --------------------------------------------------------------------------
-  ages 		    <- c (0:100)	              # Numeric vector with age-strata that are reported (Model ALWAYS models 101 age-groups; 0-2yo in weekly age-strata, and 3-100yo in annual age-strata)
-  dinf		    <- 14				                # duration of infection (days)
-  tstep			  <- 1000				              # number of timesteps in a year
-  
-  # age-dependent vaccine efficacy for first dose, based on a linear model (Hughes et al. 2020)
-  ve1_intcp   <- 0.64598                  # intercept of the linear model
-  ve1_slope   <- 0.01485                  # slope of the linear model, per month of age
-  ve2plus     <- 0.98                     # vaccine efficacy for two and more doses
-  
-  age_ve1 <- ve1_intcp + ve1_slope * 12 * c(1:(3*52)/52, 4:101)  # based on age in months
-  age_ve1 <- ifelse (age_ve1 >= ve2plus, ve2plus, age_ve1)
-  
-  # parameters for Rcpp functions
-  parms_rcpp <- list (gamma         = 1 / (dinf * tstep/365),    # rate of losing infectivity
-                      tstep         = tstep,
-                      amp           = 0.05,		                   # amplitude for seasonality
-                      ve1           = age_ve1,
-                      ve2plus       = ve2plus)
-  
-  browser()
-  
-  # --------------------------------------------------------------------------
-  # prepare input data
-  # --------------------------------------------------------------------------
-  # define filename of coverage data
-  data_coverage_routine <- paste0(o$pth$coverage,
-                                  "routine_",
-                                  scenario_name,
-                                  ".csv")
-  
-  data_coverage_sia <- paste0 (o$pth$coverage,
-                               "sia_",
-                               scenario_name,
-                               ".csv")
-  
-  browser()
-  
-  # import/read data
-  coverage_routine	<- copy(fread(data_coverage_routine))[year %in% sim_years]
-  coverage_sia		  <- copy(fread(data_coverage_sia))[year %in% sim_years]
-  timeliness  		  <- setDT(data_timeliness)
-  rnought	    		  <- setDT(data_r0)
-  population  		  <- setDT(data_pop)
-  
-  # use synthetic contact matrices
-  contact_list <- sapply (o$countries,
-                          function(cty){data_contact_syn[[cty]]},
-                          simplify = FALSE, USE.NAMES = TRUE)
-  
-  browser()
+    using_sia) {              # Whether supplementary immunization campaigns are used. 0: no SIA; 1: with SIA  (Portnoy), 2: with SIA (7.7%)
   
   # ----------------------------------------------------------------------------
   # Run model
   # ----------------------------------------------------------------------------
   for (iso3 in o$countries) {
-    out_run <- runCountry_rcpp (iso3               = iso3,
-                                years              = as.numeric (sim_years),
-                                vaccination        = vaccination,
-                                using_sia          = using_sia,
-                                parms_rcpp         = parms_rcpp,
-                                c_coverage_routine = coverage_routine[country_code == iso3,],
-                                c_coverage_sia     = coverage_sia[country_code == iso3 & coverage != 0,],
-                                c_timeliness       = timeliness[country_code == iso3,],
-                                c_contact          = contact_list[[iso3]],
-                                c_rnought          = rnought[country_code == iso3, r0],
-                                c_population       = population[country_code == iso3,],
-                                save_scenario      = save_scenario,
-                                log_name           = log_name)
+    out_run <- runCountry_rcpp(
+      scenario_name = scenario_name, 
+      iso3          = iso3,
+      vaccination   = vaccination,
+      using_sia     = using_sia)
+    
+    browser()
   }
 }
 
@@ -129,8 +29,6 @@ runScenario_rcpp <- function (
 #'  for measles vaccination, given a particular country and a variable set of
 #'  probabilistic sensitivity analysis (PSA).
 # ------------------------------------------------------------------------------
-#' @param iso3 ISO-3 code of the selected country.
-#' @param years A vector containing continuous calender years for simulation.
 #' @param vaccination A numeric indicator that determines vaccination programmes
 #'  for children: 0 - No vaccination, 1 - Only MCV1,  2 - MCV1 and MCV2.
 #' @param using_sia A numeric indicator that determines whether supplementary
@@ -157,63 +55,20 @@ runScenario_rcpp <- function (
 #' \code{iso3}.
 #' @param c_population A data frame for population size by age for a specific
 #' country.
-#' @param save_scenario A folder name for saving results from a selected
-#' scenario, denoted by a two-digit number. e.g. "scenario08".
-#' @param log_name A file name for keeping a log.
-#'
-#' @importFrom Rcpp sourceCpp
-#' @import data.table
-#'
-#' @examples
-#' \dontrun{
-#' runCountry_rcpp (
-#'   iso3               = "BGD",
-#'   years              = 1980:2020,
-#'   vaccination        = 1,
-#'   using_sia          = 1,
-#'   parms_rcpp         = list (gamma = 1/(14*1000/365),
-#'                              tstep = 1000,
-#'                              amp   = 0.05,
-#'                              ve1   = c(rep(0,40), rep(0.7, 214)),
-#'                              ve2plus = 0.98),
-#'   c_coverage_routine = coverage_routine[country_code == "BGD"],
-#'   c_coverage_sia     = coverage_sia[country_code == "BGD" & coverage!=0],
-#'   c_timeliness       = timeliness[country_code == "BGD"],
-#'   c_contact          = contact[["BGD"]],
-#'   c_rnought          = 10,
-#'   c_population       = population[country_code == "BGD"],
-#'   save_scenario      = "scenario01",
-#'   foldername         = NULL,
-#'   log_name           = "test_log"
-#'   )
-#'   }
 runCountry_rcpp <- function (
-    #variables specific for loop
-  iso3,
-  years,
+    scenario_name,
+    iso3,
+    vaccination,
+    using_sia) {
   
-  #infection dynamic variables
-  vaccination,
-  using_sia,
-  parms_rcpp,
+  # Model input data
+  d = prepare_data(iso3, scenario_name)
   
-  #input data
-  c_coverage_routine,
-  c_coverage_sia,
-  c_timeliness,
-  c_contact,
-  c_rnought,
-  c_population,
+  # Global model parameters
+  p = prepare_params()
   
-  # dynaMICE model options
-  save_scenario,
-  foldername,
-  log_name
-) {
-  
-  
-  
-  
+
+  browser()
   
   
   
@@ -435,8 +290,6 @@ runCountry_rcpp <- function (
   
   writelog (log_name, paste0 (iso3, "; Finished model run & saved outputs"))
 }
-# end of function -- runCountry_rcpp
-# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 #' Get burden estimate csv files
@@ -462,8 +315,6 @@ runCountry_rcpp <- function (
 #' vaccination.
 #' @param folder_date Starting date of the simulation, as seen in the folder
 #' name for RDS results, in the format "YYYYMMDD".
-#' @param sim_years A numeric vector containing calendar years included for
-#' model simulation.
 #'
 #' @import data.table
 #'
@@ -475,8 +326,7 @@ runCountry_rcpp <- function (
 #'   log_name                   = "test_log",
 #'   vaccination                = 0,
 #'   using_sia                  = 1,
-#'   folder_date                = "20210930",
-#'   sim_years                  = 1980:2100
+#'   folder_date                = "20210930"
 #'   )
 #'   }
 get_burden_estimate <- function (
@@ -486,7 +336,6 @@ get_burden_estimate <- function (
     vaccination,
     using_sia,
     folder_date,
-    sim_years, 
     data
 ) {
   
@@ -510,8 +359,8 @@ get_burden_estimate <- function (
   data_template = readRDS(paste0(o$pth$data, "data_template.rds"))
   
   # set up format of output file
-  years          <- as.numeric (sim_years)
-  ages           <- c(0:100)
+  years          <- o$analysis_years
+  ages           <- 0 : 100
   template    	 <- copy (setDT (data_template)) [year %in% years]   # drop rows if simulation period is shorter
   report_years   <- sort (unique (template$year))
   country_names  <- unique (subset (template, select = c("country", "country_name")))
@@ -521,12 +370,13 @@ get_burden_estimate <- function (
   # file name for burden estimates
   burden_estimate_file <- paste0 ("central_burden_estimate_", scenario_name)
   
+  browser() # We may want to load coverage for all countries here...
+  
   # coverage file
   coverage_routine <- copy(fread(paste0(o$pth$coverage,
                                         "routine_",
                                         scenario_name,
-                                        ".csv"))
-  )[year %in% sim_years]
+                                        ".csv")))
   
   # read RDS files
   all_runs <- rbindlist (lapply (output_files, function (filename, ...) {
