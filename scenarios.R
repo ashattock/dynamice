@@ -94,8 +94,6 @@ run_scenarios = function() {
   # 2: MCV1 + MCV2
   set_vaccination <- c (0, 1, 2, 2, 1, 2, 2, 2, 2, 1, 1, 2, 2)
   
-  browser()
-  
   # ---- Generate vaccine coverage scenarios ----
   
   # prepare coverage input data - update when the data are changed
@@ -142,7 +140,6 @@ run_scenarios = function() {
         save_scenario              = scenario_number,
         burden_estimate_folder     = var$burden_estimate_folder,
         log_name                   = var$log_name,
-        countries                  = o$countries,
         vaccination                = set_vaccination [index],
         using_sia                  = set_sia         [index],
         sim_years                  = 1980:2020
@@ -199,7 +196,6 @@ run_scenarios = function() {
         save_scenario              = scenario_number,
         burden_estimate_folder     = var$burden_estimate_folder,
         log_name                   = var$log_name,
-        countries                  = o$countries,
         vaccination                = set_vaccination [index],
         using_sia                  = set_sia [index],
         sim_years                  = 1980:2020
