@@ -106,7 +106,7 @@ load_coverage = function(country, scenario, type) {
   # Load coverage data and filter for years of interest
   coverage_data = fread(file_path) %>%
     filter(country_code %in% !!country, 
-           year %in% o$analysis_years) %>%
+           year %in% o$years) %>%
     select(country = country_code, year, coverage)
   
   # Remove trivial values for SIA

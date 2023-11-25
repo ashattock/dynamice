@@ -51,8 +51,6 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
   country_timeliness <- d$timeliness[!is.na(age), timeliness]
   timeliness_ages    <- d$timeliness[!is.na(age), age]
   
-  browser()
-  
   # expand 0-2 years old to weekly age strata
   s         <- 52 # number of finer stages within an age band (weekly ages, so 52)
   jt        <- 3  # how many ages to expand to s (or to weeks)
@@ -78,13 +76,11 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
   
   beta_full_unadj <- beta_full
   
-  browser()
-  
   # infection rate under target R0
-  beta_tstep  <- d$rnought*p$gamma
+  beta_tstep  <- d$rnought$r0 * p$gamma
   
   # setup inputs for DynaMICE Rcpp model
-  n_years   <- length(years)
+  n_years   <- length(o$years)
   
   y_out       <- array(0, c(254, 14, n_years))   # numbers of age groups, compartments, years
   #case_out    <- array(0, c(254, n_years))
@@ -104,10 +100,14 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
   
   t_spinup <- 1:1e5 # assume a fixed period for equilibrium period
   
-  writelog (log_name, paste0(iso3, "; Generated input data & started model run"))
+  message(" > ", iso3, ": running model")
   
   # run model by yearly input
-  for (y in years) {
+  for (y in o$years) {
+    
+    message("  ~ ", y)
+    
+    browser()
     
     #old script groups those aged 70-80, but division is by actual population size
     pop.vector <- d$population[year == y, value]
@@ -138,7 +138,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     
     
     # run spin-up period
-    if (y == years[1]){
+    if (y == o$years[1]){
       out_Comp <- rcpp_spinup (init_Comp, p, beta_full, pop.vector_full, length(t_spinup))
       # print ('Spin-up period finished')
     }
@@ -221,7 +221,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
       )
     }
     
-    t_start <- length(t_spinup) + (y-years[1])*p$tstep + 1
+    t_start <- length(t_spinup) + (y-o$years[1])*p$tstep + 1
     outp <- rcpp_vaccine_oney (out_Comp,
                                p,
                                sia_input,
@@ -232,17 +232,17 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
                                t_start)
     out_Comp <- outp$out_Comp
     
-    y_out    [, , (y-years[1])+1] <- out_Comp
+    y_out    [, , (y-o$years[1])+1] <- out_Comp
     #case_out   [, (y-years[1])+1] <- outp$cases*pop.vector_full
-    case0d_out [, (y-years[1])+1] <- outp$cases_0d*pop.vector_full     # new cases among 0-dose
-    case1d_out [, (y-years[1])+1] <- outp$cases_1d*pop.vector_full     # new cases among 1-dose
-    case2d_out [, (y-years[1])+1] <- outp$cases_2d*pop.vector_full     # new cases among >=2-dose
-    pop_out    [, (y-years[1])+1] <- rowSums(out_Comp[, 1:13])*pop.vector_full         # all compartments
-    pop0d_out  [, (y-years[1])+1] <- rowSums(out_Comp[, 1:4])*pop.vector_full          # sum of M, S, I, R
-    popSus_out [, (y-years[1])+1] <- rowSums(out_Comp[, c(2,5,8,11)])*pop.vector_full  # sum of S, V1S, V2S, V3S
-    dose_out   [, (y-years[1])+1] <- outp$doses*pop.vector_full
-    reach0_out [, (y-years[1])+1] <- outp$reach_d0*pop.vector_full
-    fvp_out    [, (y-years[1])+1] <- outp$fvps*pop.vector_full
+    case0d_out [, (y-o$years[1])+1] <- outp$cases_0d*pop.vector_full     # new cases among 0-dose
+    case1d_out [, (y-o$years[1])+1] <- outp$cases_1d*pop.vector_full     # new cases among 1-dose
+    case2d_out [, (y-o$years[1])+1] <- outp$cases_2d*pop.vector_full     # new cases among >=2-dose
+    pop_out    [, (y-o$years[1])+1] <- rowSums(out_Comp[, 1:13])*pop.vector_full         # all compartments
+    pop0d_out  [, (y-o$years[1])+1] <- rowSums(out_Comp[, 1:4])*pop.vector_full          # sum of M, S, I, R
+    popSus_out [, (y-o$years[1])+1] <- rowSums(out_Comp[, c(2,5,8,11)])*pop.vector_full  # sum of S, V1S, V2S, V3S
+    dose_out   [, (y-o$years[1])+1] <- outp$doses*pop.vector_full
+    reach0_out [, (y-o$years[1])+1] <- outp$reach_d0*pop.vector_full
+    fvp_out    [, (y-o$years[1])+1] <- outp$fvps*pop.vector_full
     
     # if(y %% 20 == 0) 
     #   message('year ', y, ' finished')
@@ -263,7 +263,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     fvps     = rbind (colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,])),
     file = save_file)
   
-  writelog (log_name, paste0 (iso3, "; Finished model run & saved outputs"))
+  message("  > ", iso3, ": finished model run & saved outputs")
 }
 
 # ------------------------------------------------------------------------------
@@ -334,7 +334,7 @@ get_burden_estimate <- function (
   data_template = readRDS(paste0(o$pth$data, "data_template.rds"))
   
   # set up format of output file
-  years          <- o$analysis_years
+  years          <- o$years
   ages           <- 0 : 100
   template    	 <- copy (setDT (data_template)) [year %in% years]   # drop rows if simulation period is shorter
   report_years   <- sort (unique (template$year))

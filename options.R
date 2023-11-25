@@ -32,7 +32,7 @@ set_options = function(do_step = NA) {
   # ---- Time settings ----
 
   # Years to analyse
-  o$analysis_years = 1980 : 2024
+  o$years = 1980 : 2024
   
   # ---- Data settings ----
   

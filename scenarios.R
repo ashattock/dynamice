@@ -11,12 +11,6 @@ run_scenarios = function() {
   
   # ---- Configure scenarios ----
   
-  message (" - Configuring scenarios")
-  
-  # set up variables
-  var <- list(
-    log_name                   = "test_log") 
-  
   # prepare coverage inputs
   vac_strategies <- c(
     "nomcv",                 # (1) no vaccination
@@ -93,7 +87,6 @@ run_scenarios = function() {
         # vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
         scenario_name              = vac_strategies [index],
         save_scenario              = scenario_number,
-        log_name                   = var$log_name,
         vaccination                = set_vaccination [index],
         using_sia                  = set_sia         [index],
         folder_date                = "20230401")
@@ -141,7 +134,6 @@ run_scenarios = function() {
       get_burden_estimate(
         scenario_name              = vac_strategies [index],
         save_scenario              = sprintf ("scenario%02d", index),
-        log_name                   = var$log_name,
         vaccination                = set_vaccination [index],
         using_sia                  = set_sia         [index],
         folder_date                = "20230401")
