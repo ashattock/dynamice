@@ -1,7 +1,9 @@
-# functions_rcpp.R
-# main functions for running the DynaMICE model based on Rcpp files
-# update: 2022/01/20
-
+###########################################################
+# MODEL
+#
+# Main transmission model functionality. 
+#
+###########################################################
 
 runScenario_rcpp <- function (
     scenario_name,
@@ -12,9 +14,9 @@ runScenario_rcpp <- function (
   # Run model
   # ----------------------------------------------------------------------------
   for (iso3 in o$countries) {
-    out_run <- runCountry_rcpp(
-      scenario_name = scenario_name, 
+    out_run <- model(
       iso3          = iso3,
+      scenario_name = scenario_name, 
       vaccination   = vaccination,
       using_sia     = using_sia)
     
@@ -23,62 +25,33 @@ runScenario_rcpp <- function (
 }
 
 # ------------------------------------------------------------------------------
-#' Execute the Rcpp measles model for a single country run
-#'
-#' A function nested under \code{\link{runScenario_rcpp}} to run Rcpp codes
-#'  for measles vaccination, given a particular country and a variable set of
-#'  probabilistic sensitivity analysis (PSA).
+# Run measles model for a given country and scenario
 # ------------------------------------------------------------------------------
-#' @param vaccination A numeric indicator that determines vaccination programmes
-#'  for children: 0 - No vaccination, 1 - Only MCV1,  2 - MCV1 and MCV2.
-#' @param using_sia A numeric indicator that determines whether supplementary
-#' immunisation activities (SIAs) are implemented and how SIAs are distributed
-#' between zero-dose and already-vaccinated populations: 0 - no SIA, 1 - SIAs
-#' based on a weighted logistic function fitted with Portnoy's data, and 2 -
-#' SIAs based on an assumption that 7.7% of the population are never reached by
-#' vaccination.
-#' @param parms_rcpp A list includes time-invariant parameters for Rcpp functions:
-#' recovery rate per timestep (\code{gamma}), number of timesteps per year (\code{tstep}),
-#'  amplification scale for seasonality (\code{amp}), vaccine efficacy for first dose
-#' by each age group (\code{ve1}), vaccine efficacy for two and more doses (\code{ve2plus}).
-#'  assuming 'take' ('all-or-not') protection for each age group (weekly age
-#' groups for age 0, 1, and 2; yearly age groups for age between 3 and 100).
-#' @param c_coverage_routine A data frame for routine vaccination coverage under
-#' a selected scenario for a specific country.
-#' @param c_coverage_sia A data frame for SIA coverage under a selected scenario
-#'  for a specific country.
-#' @param c_timeliness A data frame for timeliness estimates by age for a
-#' specific country.
-#' @param c_contact A data frame for the contact matrix by age (0-100 years old)
-#'  for a specific country.
-#' @param c_rnought A numeric variable of R0 value for the selected country
-#' \code{iso3}.
-#' @param c_population A data frame for population size by age for a specific
-#' country.
-runCountry_rcpp <- function (
-    scenario_name,
-    iso3,
-    vaccination,
-    using_sia) {
+model = function(iso3, scenario_name, vaccination, using_sia) {
+  
+  # NOTES ON INPUTS: 
+  #
+  # vaccination := A numeric indicator that determines vaccination programmes
+  # for children: 0 - No vaccination, 1 - Only MCV1,  2 - MCV1 and MCV2.
+  #
+  # using_sia := A numeric indicator that determines whether supplementary
+  # immunisation activities (SIAs) are implemented and how SIAs are distributed
+  # between zero-dose and already-vaccinated populations: 0 - no SIA, 1 - SIAs
+  # based on a weighted logistic function fitted with Portnoy's data, and 2 -
+  # SIAs based on an assumption that 7.7% of the population are never reached by
+  # vaccination.
   
   # Model input data
   d = prepare_data(iso3, scenario_name)
   
   # Global model parameters
-  p = prepare_params()
-  
-
-  browser()
-  
-  
-  
+  p = prepare_params(d)
   
   # country-specific timeliness curve
-  country_timeliness <- c_timeliness [!is.na(age), timeliness]
-  timeliness_ages    <- c_timeliness [!is.na(age), age]
+  country_timeliness <- d$timeliness[!is.na(age), timeliness]
+  timeliness_ages    <- d$timeliness[!is.na(age), age]
   
-  # country-specific age at vaccination for MCV2
-  parms_rcpp$vage2 <- as.integer (data_vage [country_code == iso3, "mcv2"])
+  browser()
   
   # expand 0-2 years old to weekly age strata
   s         <- 52 # number of finer stages within an age band (weekly ages, so 52)
@@ -86,27 +59,29 @@ runCountry_rcpp <- function (
   beta_full <- matrix (0, ncol = 254, nrow = 254)
   
   beta_full[(1:(s*jt)), (1:(s*jt))] <- expandMatrix (
-    A = c_contact [1:jt, 1:jt]/s,  # needs to be divided by 52 so that the mean total number of contacts stays the same
+    A = d$contact [1:jt, 1:jt]/s,  # needs to be divided by 52 so that the mean total number of contacts stays the same
     expand_rows =  s, expand_cols =  s,
     rescale_rows = FALSE, rescale_cols = FALSE)
   
   beta_full[1:(s*jt),((s*jt)+1):(ncol(beta_full))] <- expandMatrix(
-    A = c_contact [1:jt,(jt+1):ncol(c_contact)],
+    A = d$contact [1:jt,(jt+1):ncol(d$contact)],
     expand_rows = s, expand_cols = 1,
     rescale_rows = F, rescale_cols = F)
   
   beta_full[((s*jt)+1):(nrow(beta_full)), 1:(s*jt)] <- expandMatrix(
-    A = c_contact [(jt+1):nrow(c_contact),1:jt]/s,  # adjust to ensure the mean total number of contacts stays the same
+    A = d$contact [(jt+1):nrow(d$contact),1:jt]/s,  # adjust to ensure the mean total number of contacts stays the same
     expand_rows = 1, expand_cols = s,
     rescale_rows = F, rescale_cols = F)
   
   beta_full[((s*jt)+1):(nrow(beta_full)), ((s*jt)+1):(ncol(beta_full))] <-
-    c_contact [(jt+1):nrow(c_contact),(jt+1):ncol(c_contact)]
+    d$contact [(jt+1):nrow(d$contact),(jt+1):ncol(d$contact)]
   
   beta_full_unadj <- beta_full
   
+  browser()
+  
   # infection rate under target R0
-  beta_tstep  <- c_rnought*parms_rcpp$gamma
+  beta_tstep  <- d$rnought*p$gamma
   
   # setup inputs for DynaMICE Rcpp model
   n_years   <- length(years)
@@ -135,7 +110,7 @@ runCountry_rcpp <- function (
   for (y in years) {
     
     #old script groups those aged 70-80, but division is by actual population size
-    pop.vector <- c_population[year == y, value]
+    pop.vector <- d$population[year == y, value]
     
     # first expand polymod matrix (contact_tstep) and population vector and
     # then divide by population sizes, otherwise it doesn't work.
@@ -164,7 +139,7 @@ runCountry_rcpp <- function (
     
     # run spin-up period
     if (y == years[1]){
-      out_Comp <- rcpp_spinup (init_Comp, parms_rcpp, beta_full, pop.vector_full, length(t_spinup))
+      out_Comp <- rcpp_spinup (init_Comp, p, beta_full, pop.vector_full, length(t_spinup))
       # print ('Spin-up period finished')
     }
     
@@ -174,12 +149,12 @@ runCountry_rcpp <- function (
       # To estimate proportion that is vaccinated at each week, we first calculate the number of individuals remaining susceptible
       # Then we calculate the number of individuals that should be vaccinated each week, in order to remain 1 - coverage susceptibles at the end of the timeliness data
       # In essence, this becomes the inverse of the cumulative timeliness curve
-      cycov <- c_coverage_routine [year == y & vaccine == "MCV1", coverage]
+      cycov <- d$coverage_routine [year == y & vaccine == "MCV1", coverage]
       
       # Not use the following adjustment for coverage, as it leads to reduced the ...
       # final size of vaccinated population under the assumption of perfect timeliness
-      # cycov <- c_coverage_routine [year == y & vaccine == "MCV1", coverage] /
-      #   c_timeliness [is.na(age), prop_final_cov]
+      # cycov <- d$coverage_routine [year == y & vaccine == "MCV1", coverage] /
+      #   d$timeliness [is.na(age), prop_final_cov]
       
       if (length(cycov) == 0) {   # check if vaccine is not yet introduced and thereby, coverage value missing for this year
         cycov <- 0
@@ -203,7 +178,7 @@ runCountry_rcpp <- function (
     }
     
     if(vaccination == 2){
-      country_year_mcv2 <- c_coverage_routine [year == y & vaccine == "MCV2", coverage]
+      country_year_mcv2 <- d$coverage_routine [year == y & vaccine == "MCV2", coverage]
     } else {
       country_year_mcv2 <- 0
     }
@@ -214,7 +189,7 @@ runCountry_rcpp <- function (
     
     
     # set up SIA inputs
-    cy_coverage_sia <- c_coverage_sia [year == y]
+    cy_coverage_sia <- d$coverage_sia [year == y]
     if ((using_sia >= 1) && (dim(cy_coverage_sia)[1] > 0)) {
       # set up timesteps based on day of the year
       setorder(cy_coverage_sia, mid_day)
@@ -222,7 +197,7 @@ runCountry_rcpp <- function (
       t_sia_days <- c()
       for (iday in unique(sia_days)){
         t_sia_days <- c(t_sia_days,
-                        round(parms_rcpp$tstep*(iday/365))-1 + (1:sum(sia_days == iday)))
+                        round(p$tstep*(iday/365))-1 + (1:sum(sia_days == iday)))
       }
       
       sia_input <- list (
@@ -246,9 +221,9 @@ runCountry_rcpp <- function (
       )
     }
     
-    t_start <- length(t_spinup) + (y-years[1])*parms_rcpp$tstep + 1
+    t_start <- length(t_spinup) + (y-years[1])*p$tstep + 1
     outp <- rcpp_vaccine_oney (out_Comp,
-                               parms_rcpp,
+                               p,
                                sia_input,
                                beta_full,
                                pop.vector_full,
@@ -513,6 +488,4 @@ get_burden_estimate <- function (
   writelog (log_name, "burden estimate csv file generated")
   
   return ()
-} # end of function -- merge_case_csv
-# ------------------------------------------------------------------------------
-
+}
