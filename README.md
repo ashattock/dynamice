@@ -1,6 +1,8 @@
-# dynamice_ph
+# dynamice
 
-This repository contains data and codes used in the study:
+This forked repository runs the DynaMICE model for the WHO EPI50 analysis. 
+
+For details on the original work from which this code has been forked, see:
 - Auzenbergs M, Fu H, Abbas K, Procter SR, Cutts F, Jit M. Health impact of routine measles vaccination and supplementary immunisation activities in 14 high burden countries: a DynaMICE modelling study. Lancet Glob Health. 2023;11(8):e1194-e1204.
   - https://doi.org/10.1016/S2214-109X(23)00220-6
 
