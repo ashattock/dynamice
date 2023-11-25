@@ -2,7 +2,10 @@
 # execute simulations for MR-MAPs scenarios
 # update: 2023/04/07
 
-run_scenario = function() {
+run_scenarios = function() {
+  
+  # Only continue if specified by do_step
+  if (!is.element(1, o$do_step)) return()
 
   browser()
 

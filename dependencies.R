@@ -27,24 +27,6 @@ if (!version_num %in% stable_versions)
 # Clear global environment
 rm(list = ls())
 
-# ---- Source files ----
-
-# Scripts that should bot be sourced
-no_src = c("launch.R", "dependencies.R")
-
-# All R files, and those to source
-all_files = list.files(pattern = ".+\\.R$")
-src_files = setdiff(all_files, no_src)
-
-# Source each of these files
-for (file in src_files)
-  source(file)
-
-# Source all C++ files
-all_cpp_files = list.files(pattern = ".+\\.cpp$")
-for (file in all_cpp_files)
-  sourceCpp(file)
-
 # ---- Define packages ----
 
 # Complete list of all R packages required for this project
@@ -55,13 +37,9 @@ packages = c(
   # "gsubfn",         # Output multiple variables from functions
   # "magrittr",       # Additional pipe operators, such as %<>%
   # "rlist",          # List-related operation functions
-  # "wrapr",          # Convenience functions (eg qc)
+  "wrapr",          # Convenience functions (eg qc)
   # "stats",          # Statistical calculations and random number generation
-  # "stats4",         # MLE algorithm
   # "matrixStats",    # Matrix row and column operations
-  # "tgp",            # Latin hypercube sampler
-  # "splines",        # Spline fitting functions
-  # "pspline",        # Spline fitting functions
   # "wpp2022",        # Demographic data
   "countrycode",    # Country name <-> code transformation
   "readxl",         # Data loading functionality
@@ -90,16 +68,23 @@ library(pacman)
 # Load all required packages, installing them if required
 pacman::p_load(char = packages)
 
-# ---- Redefine or unmask particular functions ----
+# ---- Source files ----
 
-# Unmask certain commonly used functions
-select  = dplyr::select
-filter  = dplyr::filter
-rename  = dplyr::rename
-recode  = dplyr::recode
-count   = dplyr::count
-union   = dplyr::union
-predict = stats::predict
+# Scripts that should bot be sourced
+no_src = c("launch.R", "dependencies.R")
+
+# All R files, and those to source
+all_files = list.files(pattern = ".+\\.R$")
+src_files = setdiff(all_files, no_src)
+
+# Source each of these files
+for (file in src_files)
+  source(file)
+
+# Source all C++ files
+all_cpp_files = list.files(pattern = ".+\\.cpp$")
+for (file in all_cpp_files)
+  sourceCpp(file)
 
 # ---- Clean up ----
 
