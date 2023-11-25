@@ -36,23 +36,15 @@ prepare_dirs = function(o) {
   # Parent path of all output files
   pth_output = file.path(pth$code, "output")
 
-  # # Path to cached data tables
+  # Path to cached data tables
   # pth$tables = file.path(pth_output, "0_tables")
-  # 
-  # # Path to non-modelled assumptions and results
-  # pth$non_modelled   = file.path(pth_output, "1_non_modelled")
-  # pth$non_modelled_d = file.path(pth$non_modelled, "disease")
-  # pth$non_modelled_v = file.path(pth$non_modelled, "vaccine")
-  # pth$non_modelled_t = file.path(pth$non_modelled, "vaccine_type")
-  # pth$non_modelled_w = file.path(pth$non_modelled, "weights")
-  # 
-  # # Path to imputatation and impact calculation files
-  # pth$impute = file.path(pth_output, "2_impute")
-  # pth$impact = file.path(pth_output, "3_impact")
-  # 
-  # # Path to figures and other output resusts
-  # pth$results = file.path(pth_output, "4_results")
-  pth$figures = file.path(pth_output, "5_figures")
+
+  # Path to model output
+  pth$output = file.path(pth_output, "1_output")
+
+  # Path to figures and other output resusts
+  pth$results = file.path(pth_output, "2_results")
+  pth$figures = file.path(pth_output, "3_figures")
 
   # Append paths to o list
   o = set_dirs(o, pth)
@@ -70,9 +62,8 @@ set_dirs = function(o, pth) {
     this_pth = pth[[pth_name]]
 
     # If it does not already exist, create it
-    if (!dir.exists(this_pth)) {
+    if (!dir.exists(this_pth))
       dir.create(this_pth, recursive = TRUE)
-    }
 
     # Add a file separator to end of dir path
     pth[[pth_name]] = paste0(this_pth, file_sep())

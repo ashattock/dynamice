@@ -7,8 +7,6 @@
 #' Generates files for routine programmes (MCV1, MCV2) and supplementary
 #' immunisation activities (SIAs) from the vaccine coverage files.
 # ------------------------------------------------------------------------------
-#' @param vaccine_coverage_subfolder A folder name under the \code{x} folder for
-#' the vaccine coverage files.
 #' @param coverage_prefix A prefix used in naming the vaccine coverage file.
 #' @param touchstone A version note in the file name used by VIMC. Include a
 #' underscore at the beginning and end of the name.
@@ -19,14 +17,12 @@
 #' @examples
 #' \dontrun{
 #'   create_vaccine_coverage_routine_sia (
-#'   vaccine_coverage_subfolder = "scenarios/",
 #'   coverage_prefix            = "coverage",
 #'   touchstone                 = "_201910gavi-5_",
 #'   scenario_name              = "campaign-only-bestcase"
 #'   )
 #'   }
 create_vaccine_coverage_routine_sia <- function (
-    vaccine_coverage_subfolder = "",
     coverage_prefix            = "",
     touchstone                 = "",
     scenario_name              = ""
@@ -40,18 +36,16 @@ create_vaccine_coverage_routine_sia <- function (
                                    ".csv")
   
   # separate vaccine coverage file for routine immunisation
-  routine_coverage_file <- paste0 (o$pth$coverage,
-                                   vaccine_coverage_subfolder,
-                                   "routine_",
-                                   scenario_name,
-                                   ".csv")
+  routine_coverage_file <- paste0(o$pth$scenarios,
+                                  "routine_",
+                                  scenario_name,
+                                  ".csv")
   
   # separate vaccine coverage file for SIA (supplementary immunisation activities)
-  sia_coverage_file <- paste0 (o$pth$coverage,
-                               vaccine_coverage_subfolder,
-                               "sia_",
-                               scenario_name,
-                               ".csv")
+  sia_coverage_file <- paste0(o$pth$scenarios,
+                              "sia_",
+                              scenario_name,
+                              ".csv")
   
   # read vaccine coverage data file
   vaccov <- fread (file = vaccine_coverage_file,

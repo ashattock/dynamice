@@ -8,8 +8,6 @@
 #' A function that executes the Rcpp measles model under a selected vaccination
 #' scenario, including a pre-specified set of countries.
 # ------------------------------------------------------------------------------
-#' @param vaccine_coverage_subfolder A folder name under the \code{x} folder for
-#' the vaccine coverage files.
 #' @param coverage_prefix A prefix used in the name of vaccine coverage file.
 #' @param scenario_name Name of the vaccination scenario selected or being
 #' analysed.
@@ -35,7 +33,6 @@
 #' @examples
 #' \dontrun{
 #' runScenario_rcpp (
-#'   vaccine_coverage_subfolder = "scenarios/"
 #'   coverage_prefix            = "coverage",
 #'   scenario_name              = "campaign-only-default",
 #'   save_scenario               = scenario_number,
@@ -47,7 +44,6 @@
 #'   )
 #'   }
 runScenario_rcpp <- function (
-    vaccine_coverage_subfolder = "",
     coverage_prefix            = "",
     scenario_name,
     save_scenario,
@@ -57,8 +53,6 @@ runScenario_rcpp <- function (
     using_sia,              # Whether supplementary immunization campaigns are used. 0: no SIA; 1: with SIA  (Portnoy), 2: with SIA (7.7%)
     sim_years               # calendar years for simulation
 ) {
-  
-  browser()
   
   # --------------------------------------------------------------------------
   # define global parameters
@@ -82,45 +76,18 @@ runScenario_rcpp <- function (
                       ve1           = age_ve1,
                       ve2plus       = ve2plus)
   
-  # create folders with correct name for in- and output data if not yet exists
-  # typically foldername should not exist - but may come in handy when only processing results
-  if ( !exists("foldername_analysis") ) {
-    
-    foldername <- paste0 (
-      format(Sys.time(),format="%Y%m%d"),
-      "_v",
-      vaccination,
-      "_s",
-      using_sia,
-      "_deter"
-    )
-    
-    dir.create(
-      file.path(
-        paste0(
-          getwd(),
-          "/outcome/", save_scenario, "/",
-          foldername
-        )
-      ), recursive = T
-    )
-  } else {
-    foldername <- foldername_analysis
-  }
-  
+  browser()
   
   # --------------------------------------------------------------------------
   # prepare input data
   # --------------------------------------------------------------------------
   # define filename of coverage data
-  data_coverage_routine <- paste0 (o$pth$coverage,
-                                   vaccine_coverage_subfolder,
-                                   "routine_",
-                                   scenario_name,
-                                   ".csv")
+  data_coverage_routine <- paste0(o$pth$scenarios,
+                                  "routine_",
+                                  scenario_name,
+                                  ".csv")
   
-  data_coverage_sia <- paste0 (o$pth$coverage,
-                               vaccine_coverage_subfolder,
+  data_coverage_sia <- paste0 (o$pth$scenarios,
                                "sia_",
                                scenario_name,
                                ".csv")
@@ -156,7 +123,6 @@ runScenario_rcpp <- function (
                                 c_rnought          = rnought[country_code == iso3, r0],
                                 c_population       = population[country_code == iso3,],
                                 save_scenario      = save_scenario,
-                                foldername         = foldername,
                                 log_name           = log_name)
   }
   return()
@@ -201,8 +167,6 @@ runScenario_rcpp <- function (
 #' country.
 #' @param save_scenario A folder name for saving results from a selected
 #' scenario, denoted by a two-digit number. e.g. "scenario08".
-#' @param foldername Name of the folder for output files that are temporarily
-#' kept for processing into final results.
 #' @param log_name A file name for keeping a log.
 #'
 #' @importFrom Rcpp sourceCpp
@@ -451,10 +415,12 @@ runCountry_rcpp <- function (
     reach0_out [, (y-years[1])+1] <- outp$reach_d0*pop.vector_full
     fvp_out    [, (y-years[1])+1] <- outp$fvps*pop.vector_full
     
-    
     # if(y %% 20 == 0) 
     #   message('year ', y, ' finished')
   }
+  
+  save_name = paste1(save_scenario, iso3, vaccination, using_sia)
+  save_file = paste0(pth$output, save_name, ".rds")
   
   saveRDS (list(#cases   = rbind (colSums(  case_out[1:52,]), colSums(  case_out[53:104,]), colSums(  case_out[105:156,]),
     cases0d  = rbind (colSums(case0d_out[1:52,]), colSums(case0d_out[53:104,]), colSums(case0d_out[105:156,]), case0d_out[157:254,]),
@@ -466,8 +432,7 @@ runCountry_rcpp <- function (
     doses    = rbind (colSums(  dose_out[1:52,]), colSums(  dose_out[53:104,]), colSums(  dose_out[105:156,]),   dose_out[157:254,]),
     reachs0d = rbind (colSums(reach0_out[1:52,]), colSums(reach0_out[53:104,]), colSums(reach0_out[105:156,]), reach0_out[157:254,]),
     fvps     = rbind (colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,])),
-    file = paste0 ("outcome/", save_scenario, "/", foldername, "/", iso3, ".RDS")
-  )
+    file = save_file)
   
   writelog (log_name, paste0 (iso3, "; Finished model run & saved outputs"))
 }
@@ -483,8 +448,6 @@ runCountry_rcpp <- function (
 #' are included (\code{psa > 0}), an additional csv is generated for the mean
 #' estimates of each country.
 # ------------------------------------------------------------------------------
-#' @param vaccine_coverage_subfolder A folder name under the \code{x} folder for
-#' the vaccine coverage files.
 #' @param scenario_name Name of the vaccination scenario selected or being
 #' analysed.
 #' @param save_scenario A folder name for saving results from a selected
@@ -510,7 +473,6 @@ runCountry_rcpp <- function (
 #' @examples
 #' \dontrun{
 #' get_burden_estimate (
-#'   vaccine_coverage_subfolder = "scenarios/"
 #'   scenario_name              = "campaign-only-default",
 #'   save_scenario               = scenario_number,
 #'   burden_estimate_folder     = "central_burden_estimate/",
@@ -522,7 +484,6 @@ runCountry_rcpp <- function (
 #'   )
 #'   }
 get_burden_estimate <- function (
-    vaccine_coverage_subfolder,
     scenario_name,
     save_scenario,
     burden_estimate_folder,
@@ -562,11 +523,10 @@ get_burden_estimate <- function (
   burden_estimate_file <- paste0 ("central_burden_estimate_", scenario_name)
   
   # coverage file
-  coverage_routine	<- copy (fread (paste0 (o$pth$coverage,
-                                           vaccine_coverage_subfolder,
-                                           "routine_",
-                                           scenario_name,
-                                           ".csv"))
+  coverage_routine <- copy(fread(paste0(o$pth$scenarios,
+                                        "routine_",
+                                        scenario_name,
+                                        ".csv"))
   )[year %in% sim_years]
   
   # read RDS files

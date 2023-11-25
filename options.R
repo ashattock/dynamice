@@ -21,7 +21,7 @@ set_options = function(do_step = NA) {
   o = list(do_step = do_step)
 
   # Prepare output directory system
-  # o = prepare_dirs(o)  # See directories.R
+  o = prepare_dirs(o)  # See directories.R
 
   # ---- Country scope ----
 

@@ -57,7 +57,6 @@ run_scenarios = function() {
   var <- list(
     coverage_prefix            = "coverage",
     touchstone                 = "_",
-    vaccine_coverage_subfolder = "scenarios/",
     burden_estimate_folder     = "central_burden_estimate/",
     log_name                   = "test_log") 
   
@@ -102,7 +101,7 @@ run_scenarios = function() {
     # generate 2 coverage input files for routine and SIA vaccination
     for (index in 1:length(vac_strategies)){
       create_vaccine_coverage_routine_sia (
-        vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
+        # vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
         coverage_prefix            = var$coverage_prefix,
         touchstone                 = var$touchstone,
         scenario_name              = vac_strategies [index]
@@ -130,11 +129,8 @@ run_scenarios = function() {
       
       scenario_number <- sprintf("scenario%02d", index)
       
-      browser()
-      
       # run model and estimate cases
       burden_estimate_file <- runScenario_rcpp (
-        vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
         coverage_prefix            = var$coverage_prefix,
         scenario_name              = scenario_name,
         save_scenario              = scenario_number,
@@ -145,13 +141,15 @@ run_scenarios = function() {
         sim_years                  = 1980:2020
       )
       
+      browser()
+      
       # separately estimate dalys
       burden_estimate_file <- paste0 ("central_burden_estimate_",
                                       scenario_name, ".csv")
       
       # merge outputs into csv files
       get_burden_estimate(
-        vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
+        # vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
         scenario_name              = vac_strategies [index],
         save_scenario              = scenario_number,
         burden_estimate_folder     = var$burden_estimate_folder,
@@ -190,7 +188,6 @@ run_scenarios = function() {
       
       # run model and estimate cases
       burden_estimate_file <- runScenario_rcpp (
-        vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
         coverage_prefix            = var$coverage_prefix,
         scenario_name              = scenario_name,
         save_scenario              = scenario_number,
@@ -207,7 +204,6 @@ run_scenarios = function() {
       
       # merge outputs into csv files
       get_burden_estimate(
-        vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
         scenario_name              = vac_strategies [index],
         save_scenario              = sprintf ("scenario%02d", index),
         burden_estimate_folder     = var$burden_estimate_folder,
