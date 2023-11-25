@@ -7,49 +7,24 @@
 #' Generates files for routine programmes (MCV1, MCV2) and supplementary
 #' immunisation activities (SIAs) from the vaccine coverage files.
 # ------------------------------------------------------------------------------
-#' @param coverage_prefix A prefix used in naming the vaccine coverage file.
-#' @param touchstone A version note in the file name used by VIMC. Include a
-#' underscore at the beginning and end of the name.
 #' @param scenario_name Name of the vaccination scenario selected or being analysed.
 #'
 #' @import data.table
 #'
 #' @examples
 #' \dontrun{
-#'   create_vaccine_coverage_routine_sia (
-#'   coverage_prefix            = "coverage",
-#'   touchstone                 = "_201910gavi-5_",
-#'   scenario_name              = "campaign-only-bestcase"
-#'   )
+#'   create_vaccine_coverage_routine_sia("campaign-only-bestcase")
 #'   }
-create_vaccine_coverage_routine_sia <- function (
-    coverage_prefix            = "",
-    touchstone                 = "",
-    scenario_name              = ""
-) {
+create_vaccine_coverage_routine_sia = function(scenario_name) {
   
-  # vaccine coverage file
-  vaccine_coverage_file <- paste0 (o$pth$coverage,
-                                   coverage_prefix,
-                                   touchstone,
-                                   scenario_name,
-                                   ".csv")
-  
-  # separate vaccine coverage file for routine immunisation
-  routine_coverage_file <- paste0(o$pth$scenarios,
-                                  "routine_",
-                                  scenario_name,
-                                  ".csv")
-  
-  # separate vaccine coverage file for SIA (supplementary immunisation activities)
-  sia_coverage_file <- paste0(o$pth$scenarios,
-                              "sia_",
-                              scenario_name,
-                              ".csv")
+  # Coverage file for this scenario - to be split between routine and SIA
+  file = list(
+    coverage = paste0(o$pth$coverage, "coverage_", scenario_name, ".csv"), 
+    routine  = paste0(o$pth$coverage, "routine_",  scenario_name, ".csv"), 
+    sia      = paste0(o$pth$coverage, "sia_",      scenario_name, ".csv"))
   
   # read vaccine coverage data file
-  vaccov <- fread (file = vaccine_coverage_file,
-                   stringsAsFactors = F, na.strings = "<NA>")
+  vaccov <- fread(file = file$coverage, na.strings = "<NA>")
   
   # select routine vaccination coverage
   keep_cols_routine <- c("vaccine", "country_code", "country", "year", "coverage")
@@ -62,9 +37,8 @@ create_vaccine_coverage_routine_sia <- function (
                  ..keep_cols_sia]
   
   # check if national or subnational coverage >100%
-  if (nrow(sia [coverage > 1 || coverage_subnat > 1]) > 0){
+  if (nrow(sia[coverage > 1 | coverage_subnat > 1]) > 0)
     stop ("national or subnational coverage > 100%")
-  }
   
   # -----------------------------------------------------------------------------------
   # calculate values for a0 and a1 to match the age groups
@@ -84,11 +58,9 @@ create_vaccine_coverage_routine_sia <- function (
   sia [a1 == 0, a1 := 1]
   
   # write vaccine coverage data for routine vaccination and SIAs
-  fwrite (x = routine, file = routine_coverage_file)
-  fwrite (x = sia,     file = sia_coverage_file)
-  
-} # end of function -- create_vaccine_coverage_routine_sia
-# ------------------------------------------------------------------------------
+  fwrite(x = routine, file = file$routine)
+  fwrite(x = sia,     file = file$sia)
+}
 
 
 # ------------------------------------------------------------------------------

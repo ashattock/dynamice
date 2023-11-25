@@ -35,7 +35,7 @@ packages = c(
   "data.table",     # Next generation dataframes
   "Rcpp",           # C++ integration
   # "gsubfn",         # Output multiple variables from functions
-  # "magrittr",       # Additional pipe operators, such as %<>%
+  "magrittr",       # Additional pipe operators, such as %<>%
   # "rlist",          # List-related operation functions
   "wrapr",          # Convenience functions (eg qc)
   # "stats",          # Statistical calculations and random number generation

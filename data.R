@@ -7,11 +7,9 @@
 #' A dataset containing population estimates from United Nations World
 #' Population Prospects 2019.
 #'
-#' @format A data table with 27137760 observations of 8 variables.
+#' @format A data table with 27137760 observations of 6 variables.
 #' \describe{
-#'   \item{country_code_numeric}{Country code numeric}
-#'   \item{country_code}{ISO3 country code}
-#'   \item{country}{Country name}
+#'   \item{country}{ISO3 country code}
 #'   \item{age_from}{age from (start-age)}
 #'   \item{age_to}{age to (end-age)}
 #'   \item{year}{Year}
@@ -77,10 +75,9 @@
 #'
 #' A dataset containing R0 estimates of measles in 112 countries.
 #'
-#' @format A data table with 336 observations of 3 variables.
+#' @format A data table with 336 observations of 2 variables.
 #' \describe{
-#'   \item{country}{Country name}
-#'   \item{country_code}{ISO3 country code}
+#'   \item{country}{ISO3 country code}
 #'   \item{r0}{Numeric value of R0 estimate}
 #' }
 #' @source {Estimates provided by Ferrari M and team for the 2019 VIMC runs}
@@ -93,7 +90,7 @@
 #'
 #' @format A data table with 34496 observations of 4 variables.
 #' \describe{
-#'   \item{country_code}{ISO3 country code}
+#'   \item{country}{ISO3 country code}
 #'   \item{age}{age in weeks. \code{NA} represents the overall population. For
 #'   0-1 year old (0-52 weeks),  \code{timeliness} is presented each week; for
 #'   1-3 year old (53-156 weeks), it is presented the first week of each month.}
@@ -112,11 +109,9 @@
 #'
 #' A dataset containing estimates of life expectancy at birth.
 #'
-#' @format A data table with 137712 observations of 8 variables.
+#' @format A data table with 137712 observations of 6 variables.
 #' \describe{
-#'   \item{country_code_numeric}{Numeric country code}
-#'   \item{country_code}{ISO3 country code}
-#'   \item{country}{Country name}
+#'   \item{country}{ISO3 country code}
 #'   \item{age_from}{Age from (start-age)}
 #'   \item{age_to}{Age to (end-age)}
 #'   \item{year}{Year}
@@ -132,11 +127,9 @@
 #'
 #' A dataset containing estimates of life expectancy for a specific age group.
 #'
-#' @format A data table with 601920 observations of 8 variables.
+#' @format A data table with 601920 observations of 6 variables.
 #' \describe{
-#'   \item{country_code_numeric}{Numeric country code}
-#'   \item{country_code}{ISO3 country code}
-#'   \item{country}{Country name}
+#'   \item{country}{ISO3 country code}
 #'   \item{age_from}{Age from (start-age)}
 #'   \item{age_to}{Age to (end-age)}
 #'   \item{year}{Year}
@@ -153,10 +146,9 @@
 #' A dataset containing the case fatality ratios (CFRs) by scenario, calender
 #' year and age groups of under and over 5 years. using Portnoy estimates.
 #'
-#' @format A data table with 156240 observations of 45 variables.
+#' @format A data table with 156240 observations of 44 variables.
 #' \describe{
-#'   \item{country_name}{Country name}
-#'   \item{country_code}{ISO3 country code}
+#'   \item{country}{ISO3 country code}
 #'   \item{GBD Region}{GBD regions}
 #'   \item{U5MR}{Groups for under-5 mortaltiy rate, >=50 or LAC<50}
 #'   \item{year}{Year}

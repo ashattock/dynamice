@@ -26,10 +26,7 @@ prepare_dirs = function(o) {
   # pth$input    = file.path(pth$code, "input")
   pth$config   = file.path(pth$code, "config")
   pth$data     = file.path(pth$code, "data")
-  
-  # Parent path to coverage-related files
-  pth$coverage  = file.path(pth$code, "coverage")
-  pth$scenarios = file.path(pth$coverage, "scenarios")
+  pth$coverage = file.path(pth$code, "coverage")
 
   # ---- Output directories ----
 
@@ -38,12 +35,10 @@ prepare_dirs = function(o) {
 
   # Path to cached data tables
   # pth$tables = file.path(pth_output, "0_tables")
-
-  # Path to model output
-  pth$output = file.path(pth_output, "1_output")
-
-  # Path to figures and other output resusts
-  pth$results = file.path(pth_output, "2_results")
+  
+  # Path to results and figures
+  pth$central = file.path(pth_output, "1_central")
+  pth$uncert  = file.path(pth_output, "2_uncertainty")
   pth$figures = file.path(pth_output, "3_figures")
 
   # Append paths to o list

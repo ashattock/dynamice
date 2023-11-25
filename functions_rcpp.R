@@ -8,13 +8,10 @@
 #' A function that executes the Rcpp measles model under a selected vaccination
 #' scenario, including a pre-specified set of countries.
 # ------------------------------------------------------------------------------
-#' @param coverage_prefix A prefix used in the name of vaccine coverage file.
 #' @param scenario_name Name of the vaccination scenario selected or being
 #' analysed.
 #' @param save_scenario A folder name for saving results from a selected
 #' scenario, denoted by a two-digit number. e.g. "scenario08".
-#' @param burden_estimate_folder A folder name for the file which contains the
-#' model outputs for evaluation. Include a slash at the end.
 #' @param log_name A file name for keeping a log.
 #' @param vaccination A numeric indicator that determines vaccination programmes
 #'  for children: 0 - No vaccination, 1 - Only MCV1, and 2 - MCV1 and MCV2.
@@ -33,10 +30,8 @@
 #' @examples
 #' \dontrun{
 #' runScenario_rcpp (
-#'   coverage_prefix            = "coverage",
 #'   scenario_name              = "campaign-only-default",
 #'   save_scenario               = scenario_number,
-#'   burden_estimate_folder     = "central_burden_estimate/",
 #'   log_name                   = "test_log",
 #'   vaccination                = 0,
 #'   using_sia                  = 1
@@ -44,14 +39,13 @@
 #'   )
 #'   }
 runScenario_rcpp <- function (
-    coverage_prefix            = "",
     scenario_name,
     save_scenario,
-    burden_estimate_folder, # burden estimate folder
     log_name,
     vaccination,            # Whether children are vaccinated. 0: No vaccination; 1: Only MCV1; 2: MCV1 and MCV2
     using_sia,              # Whether supplementary immunization campaigns are used. 0: no SIA; 1: with SIA  (Portnoy), 2: with SIA (7.7%)
-    sim_years               # calendar years for simulation
+    sim_years,              # calendar years for simulation
+    data
 ) {
   
   # --------------------------------------------------------------------------
@@ -82,23 +76,24 @@ runScenario_rcpp <- function (
   # prepare input data
   # --------------------------------------------------------------------------
   # define filename of coverage data
-  data_coverage_routine <- paste0(o$pth$scenarios,
+  data_coverage_routine <- paste0(o$pth$coverage,
                                   "routine_",
                                   scenario_name,
                                   ".csv")
   
-  data_coverage_sia <- paste0 (o$pth$scenarios,
+  data_coverage_sia <- paste0 (o$pth$coverage,
                                "sia_",
                                scenario_name,
                                ".csv")
   
+  browser()
+  
   # import/read data
-  coverage_routine	<- copy (fread (data_coverage_routine))[year %in% sim_years]
-  coverage_sia		  <- copy (fread (data_coverage_sia))[year %in% sim_years]
-  timeliness  		  <- setDT (data_timeliness)
-  rnought	    		  <- setDT (data_r0)
-  population  		  <- setDT (data_pop)
-  template    		  <- setDT (data_template)
+  coverage_routine	<- copy(fread(data_coverage_routine))[year %in% sim_years]
+  coverage_sia		  <- copy(fread(data_coverage_sia))[year %in% sim_years]
+  timeliness  		  <- setDT(data_timeliness)
+  rnought	    		  <- setDT(data_r0)
+  population  		  <- setDT(data_pop)
   
   # use synthetic contact matrices
   contact_list <- sapply (o$countries,
@@ -125,10 +120,7 @@ runScenario_rcpp <- function (
                                 save_scenario      = save_scenario,
                                 log_name           = log_name)
   }
-  return()
-  
-} # end of function -- runScenario_rcpp
-# ------------------------------------------------------------------------------
+}
 
 # ------------------------------------------------------------------------------
 #' Execute the Rcpp measles model for a single country run
@@ -218,6 +210,13 @@ runCountry_rcpp <- function (
   foldername,
   log_name
 ) {
+  
+  
+  
+  
+  
+  
+  
   
   # country-specific timeliness curve
   country_timeliness <- c_timeliness [!is.na(age), timeliness]
@@ -452,8 +451,6 @@ runCountry_rcpp <- function (
 #' analysed.
 #' @param save_scenario A folder name for saving results from a selected
 #' scenario, denoted by a two-digit number. e.g. "scenario08".
-#' @param burden_estimate_folder A folder name for the file which contains the
-#' model outputs for evaluation. Include a slash at the end.
 #' @param log_name A file name for keeping a log.
 #' @param vaccination A numeric indicator that determines vaccination programmes
 #'  for children: 0 - No vaccination, 1 - Only MCV1, and 2 - MCV1 and MCV2.
@@ -475,7 +472,6 @@ runCountry_rcpp <- function (
 #' get_burden_estimate (
 #'   scenario_name              = "campaign-only-default",
 #'   save_scenario               = scenario_number,
-#'   burden_estimate_folder     = "central_burden_estimate/",
 #'   log_name                   = "test_log",
 #'   vaccination                = 0,
 #'   using_sia                  = 1,
@@ -486,12 +482,12 @@ runCountry_rcpp <- function (
 get_burden_estimate <- function (
     scenario_name,
     save_scenario,
-    burden_estimate_folder,
     log_name,
     vaccination,
     using_sia,
     folder_date,
-    sim_years
+    sim_years, 
+    data
 ) {
   
   browser()
@@ -510,6 +506,9 @@ get_burden_estimate <- function (
   output_files <- list.files (path = paste0 ("outcome/", save_scenario, "/",foldername,"/"),
                               recursive = T, full.names = T)
   
+  # Load VIMC results template 
+  data_template = readRDS(paste0(o$pth$data, "data_template.rds"))
+  
   # set up format of output file
   years          <- as.numeric (sim_years)
   ages           <- c(0:100)
@@ -523,7 +522,7 @@ get_burden_estimate <- function (
   burden_estimate_file <- paste0 ("central_burden_estimate_", scenario_name)
   
   # coverage file
-  coverage_routine <- copy(fread(paste0(o$pth$scenarios,
+  coverage_routine <- copy(fread(paste0(o$pth$coverage,
                                         "routine_",
                                         scenario_name,
                                         ".csv"))
@@ -600,6 +599,7 @@ get_burden_estimate <- function (
             old = c("i.country", "i.year", "coverage"),
             new = c("country"  , "year"  , "MCV1"    ))
   
+  browser() # Use data$cfr here
   
   # --------------------------------------------------------------------------
   # calculate deaths and DALYs
@@ -653,8 +653,8 @@ get_burden_estimate <- function (
   all_runs <- subset (all_runs, select = select.cols)
   
   # save burden estimates to file
-  fwrite (x     = all_runs [order (country, year, age)],
-          file  = paste0 (burden_estimate_folder,  burden_estimate_file, ".csv"))
+  fwrite(x    = all_runs[order(country, year, age)],
+         file = paste0(o$pth$central, burden_estimate_file, ".csv"))
   
   
   # release memory for the next round
