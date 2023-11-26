@@ -29,6 +29,8 @@ rm(list = ls())
 
 # ---- Define packages ----
 
+message("* Installing required packages")
+
 # Complete list of all R packages required for this project
 packages = c(
   "tidyverse",      # Includes ggplot2, dplyr, tidyr (www.tidyverse.org/packages/)
@@ -52,8 +54,6 @@ packages = c(
   "colorspace")     # Colour palettes
 
 # ---- Install and/or load R packages with pacman ----
-
-message("* Installing required packages")
 
 # Check whether pacman itself has been installed
 pacman_installed = "pacman" %in% rownames(installed.packages())

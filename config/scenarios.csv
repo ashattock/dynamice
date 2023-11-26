@@ -1,14 +1,14 @@
 scenario,scenario_name,set_routine,set_sia
-nomcv,No vaccination,r0,s0
-mcv1,MCV1 only,r1,s0
-mcv1_mcv2,MCV1 + MCV2,r2,s0
-mcv1_mcv2_sia,MCV1 + MCV2 + SIA,r2,s2
-mcv1_sia,MCV1 + SIA,r1,s2
-mcv1_mcv2alt1,"MCV1 + MCV2 (early intro, fast rollout)",r2,s0
-mcv1_mcv2alt1_sia,"MCV1 + MCV2 (early intro, fast rollout) + SIA",r2,s2
-mcv1_mcv2_siaalt1,MCV1 + MCV2 + SIA (zero dose first),r2,s3
-mcv1_mcv2_siaalt2,MCV1 + MCV2 + SIA (already vaccinated first),r2,s4
-mcv1_siaalt1,MCV1 + SIA (zero dose first),r1,s3
-mcv1_siaalt2,MCV1 + SIA (already vaccinated first),r1,s4
-mcv1_mcv2alt1_siaalt1,MCV1 + MCV2 (early intro) + SIA (zero dose first),r2,s3
-mcv1_mcv2alt2,"MCV1 + MCV2 (early intro, gradual rollout)",r2,s0
+nomcv,No vaccination,0,0
+mcv1,MCV1 only,1,0
+mcv1_mcv2,MCV1 + MCV2,2,0
+mcv1_mcv2_sia,MCV1 + MCV2 + SIA,2,2
+mcv1_sia,MCV1 + SIA,1,2
+mcv1_mcv2alt1,"MCV1 + MCV2 (early intro, fast rollout)",2,0
+mcv1_mcv2alt1_sia,"MCV1 + MCV2 (early intro, fast rollout) + SIA",2,2
+mcv1_mcv2_siaalt1,MCV1 + MCV2 + SIA (zero dose first),2,3
+mcv1_mcv2_siaalt2,MCV1 + MCV2 + SIA (already vaccinated first),2,4
+mcv1_siaalt1,MCV1 + SIA (zero dose first),1,3
+mcv1_siaalt2,MCV1 + SIA (already vaccinated first),1,4
+mcv1_mcv2alt1_siaalt1,MCV1 + MCV2 (early intro) + SIA (zero dose first),2,3
+mcv1_mcv2alt2,"MCV1 + MCV2 (early intro, gradual rollout)",2,0

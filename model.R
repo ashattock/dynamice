@@ -8,9 +8,7 @@
 # ------------------------------------------------------------------------------
 # Run measles model for a given country and scenario
 # ------------------------------------------------------------------------------
-model = function(sim) { # iso3, scenario_name, routine, using_sia) {
-  
-  # ---- Load data and parameters ----
+model = function(sim) {
   
   # Model input data
   d = prepare_data(sim)
@@ -50,7 +48,7 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
   beta_full_unadj <- beta_full
   
   # infection rate under target R0
-  beta_tstep  <- d$rnought$r0 * p$gamma
+  beta_tstep  <- d$r0 * p$gamma
   
   # setup inputs for DynaMICE Rcpp model
   n_years   <- length(o$years)
@@ -74,12 +72,10 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
   
   # ---- Main model loop ----
   
-  message("  > ", iso3, ": running model")
-  
   # run model by yearly input
   for (y in o$years) {
     
-    message("   ~ ", y)
+    message("  - ", y)
     
     # ---- Spin up ----
     
@@ -116,7 +112,7 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
     
     # ---- Coverage and timeliness ----
     
-    if (routine >= 1) {
+    if (sim$set_routine >= 1) {
       
       # Maximum coverage can (obviously) only be 100%
       # To estimate proportion that is vaccinated at each week, we first calculate the number of individuals remaining susceptible
@@ -150,7 +146,7 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
       country_year_timeliness_mcv1_allages <- rep(0, 254)
     }
     
-    if (routine == 2) {
+    if (sim$set_routine == 2) {
       country_year_mcv2 <- d$coverage_routine [year == y & vaccine == "MCV2", coverage]
     } else {
       country_year_mcv2 <- 0
@@ -162,7 +158,7 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
     
     # set up SIA inputs
     cy_coverage_sia <- d$coverage_sia [year == y]
-    if ((using_sia >= 1) && (dim(cy_coverage_sia)[1] > 0)) {
+    if ((sim$set_sia >= 1) && (dim(cy_coverage_sia)[1] > 0)) {
       # set up timesteps based on day of the year
       setorder(cy_coverage_sia, mid_day)
       sia_days <- cy_coverage_sia$mid_day
@@ -173,7 +169,7 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
       }
       
       sia_input <- list (
-        sia_implement = using_sia, # choose SIA implementation approach
+        sia_implement = sim$set_sia, # choose SIA implementation approach
         a0 = cy_coverage_sia$a0,
         a1 = cy_coverage_sia$a1,
         siacov = as.double(cy_coverage_sia$coverage),
@@ -224,6 +220,8 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
     fvp_out    [, (y-o$years[1])+1] <- outp$fvps*pop.vector_full
   }
   
+  # ---- Save model output ----
+  
   # Summarise complete model output
   output = list(
     cases0d  = rbind(colSums(case0d_out[1:52,]), colSums(case0d_out[53:104,]), colSums(case0d_out[105:156,]), case0d_out[157:254,]),
@@ -236,13 +234,8 @@ model = function(sim) { # iso3, scenario_name, routine, using_sia) {
     reachs0d = rbind(colSums(reach0_out[1:52,]), colSums(reach0_out[53:104,]), colSums(reach0_out[105:156,]), reach0_out[157:254,]),
     fvps     = rbind(colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,]))
   
-  browser()
-  
-  save_name = paste1(iso3, scenario_name, routine, using_sia)
-  save_file = paste0(o$pth$sims, save_name, ".rds")
-  
   # Save model output
-  saveRDS(output, file = save_file)
+  saveRDS(output, file = paste0(o$pth$sims, sim$id, ".rds"))
 }
 
 # ------------------------------------------------------------------------------
@@ -259,8 +252,8 @@ get_burden_estimate = function(sim) {
   # define folder name
   foldername <- paste0 (
     folder_date,
-    "_v", routine,
-    "_s", using_sia,
+    "_v", sim$set_routine,
+    "_s", sim$set_sia,
     "_deter")
   
   # merge results
