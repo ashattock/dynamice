@@ -193,6 +193,7 @@ run_aggregate = function(sims) {
         select(country, scenario, r0, 
                year, age, metric, value)
       
+      # Construct file name and path to save
       save_name = paste1(country, scenario)
       save_file = paste0(o$pth$compiled, save_name, ".rds")
       

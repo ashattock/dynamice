@@ -80,7 +80,10 @@ set_options = function(do_step = NA, quiet = FALSE) {
   # Action to take if user is already running cluster jobs
   o$cluster_conflict_action = "error"  # Set to 'none' to turn off
   
-  # ---- Plotting flags ----
+  # ---- Results and plotting flags ----
+  
+  # Produce main VIMC outputs
+  o$do_vimc_files = TRUE
 
   # Turn figures on or off
   o$plot_coverage   = TRUE
