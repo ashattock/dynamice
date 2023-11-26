@@ -37,9 +37,10 @@ prepare_dirs = function(o) {
   # pth$tables = file.path(pth_output, "0_tables")
   
   # Path to results and figures
-  pth$central = file.path(pth_output, "1_central")
-  pth$uncert  = file.path(pth_output, "2_uncertainty")
-  pth$figures = file.path(pth_output, "3_figures")
+  pth$sims    = file.path(pth_output, "1_central")
+  pth$central = file.path(pth_output, "2_central")
+  pth$uncert  = file.path(pth_output, "3_uncertainty")
+  pth$figures = file.path(pth_output, "4_figures")
 
   # Append paths to o list
   o = set_dirs(o, pth)

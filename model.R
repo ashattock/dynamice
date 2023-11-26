@@ -268,7 +268,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     fvps     = rbind(colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,]))
   
   save_name = paste1(iso3, scenario_name, vaccination, using_sia)
-  save_file = paste0(o$pth$output, save_name, ".rds")
+  save_file = paste0(o$pth$sims, save_name, ".rds")
   
   # Save model output
   saveRDS(output, file = save_file)

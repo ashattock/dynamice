@@ -17,8 +17,8 @@ message("Running DynaMICE for EPI50 analysis")
 # Set options (see options.R)
 o = set_options(do_step = 1)
 
-# Step 1) Run vaccine scenarios
-run_scenarios()  # See scenarios.R
+# Step 1) Run all simulations
+run_simulations()  # See simulations.R
 
 # Step 2) Produce outputs and figures
 run_results()  # See results.R

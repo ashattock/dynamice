@@ -1,15 +1,69 @@
-# run_scenario
-# execute simulations for MR-MAPs scenarios
-# update: 2023/04/07
+############################################################
+# SIMULATIONS
+#
+# Create, simulate, and post-process all simulations.
+#
+############################################################
 
-run_scenarios = function() {
+# ---------------------------------------------------------
+# Parent function for creating and running all simulations
+# ---------------------------------------------------------
+run_simulations = function() {
   
   # Only continue if specified by do_step
   if (!is.element(1, o$do_step)) return()
   
-  message("* Running vaccine scenarios")
+  message("* Running vaccine simulations")
   
-  # ---- Configure scenarios ----
+  # Generate full set of simulations to run
+  sims = get_simulations()
+  
+  # ---- Run simulations ----
+  
+  # Number of jobs to be run
+  n_jobs = sum(sims$run)
+  
+  browser()
+  
+  # Skip if nothing to run
+  if (n_jobs > 0) {
+    
+    # Specify wrapper function for running this set of simulations
+    sim_fn = paste0("run_sim_", timeframe)
+    
+    # Submit all jobs to the cluster (see myRfunctions.R)
+    submit_cluster_jobs(n_jobs, "bash_submit.sh", sim_fn)
+    
+    # Throw an error if any cluster jobs failed (see myRfunctions.R)
+    stop_if_errors(o$pth$log, o$err_file, err_tol = 1)
+  }
+  
+  browser()
+  
+  # ---- Concatenate output ----
+  
+  # Aggregate results for each branch and indicator
+  # run_aggregate(sims, timeframe)  # See aggregate.R
+}
+
+# ---------------------------------------------------------
+# Generate full set of simulations to run
+# ---------------------------------------------------------
+get_simulations = function() {
+  
+  browser()
+  
+  # Grid of countries, EIR, and seeds
+  sims = expand_grid(country  = o$countries, 
+                     eir      = o$sim$eir, 
+                     seed     = 1 : o$sim$n_seeds[[timeframe]], 
+                     scenario = run_scenarios) %>%
+    # Append scenario ID...
+    mutate(id = get_simulation_id(.)) %>%
+    arrange(scenario, country, eir, seed) %>%
+    as.data.table()
+  
+  browser()
   
   # prepare coverage inputs
   vac_strategies <- c(
@@ -49,6 +103,72 @@ run_scenarios = function() {
   # Prepare coverage input data - update when the data are changed
   if (o$reload_coverage)
     lapply(vac_strategies, create_vaccine_coverage_routine_sia)
+  
+  
+  
+  
+  
+  # ---- Skip existing sims ----
+  
+  message(" > Identifying previously completed simulations")
+  
+  # Extract IDs of sims that have already been run for each country
+  exist_pth = o$pth[[paste1("post", timeframe)]]
+  exist_id  = str_remove(list.files(exist_pth), ".rds$")
+  
+  # Logical whether simulation should be run / rerun
+  run_sim = !(sims$id %in% exist_id)
+  if (o$overwrite) run_sim[] = TRUE
+  
+  # Skip any existing sims (unless overwriting)
+  sims %<>%
+    cbind(run = run_sim) %>%
+    mutate(job_num = cumsum(run * 1), 
+           job_num = ifelse(run, job_num, NA))
+  
+  # Save scenario dataframe to file
+  saveRDS(sims, file = paste0(o$pth$sim_input, "simulations_", timeframe, ".rds"))
+  
+  # ---- Display number of sims ----
+  
+  # Number of sims
+  n_total = nrow(sims)
+  n_run   = sum(sims$run)
+  
+  # Report total number of sims
+  message(" > Total number of simulations: ", thou_sep(n_total))
+  
+  # Report number of sims we'll run now
+  message("  - Skipping: ", thou_sep(n_total - n_run))
+  message("  - Simulating: ", thou_sep(n_run))
+  
+  return(sims)
+}
+  
+# ---------------------------------------------------------
+# Create simulation ID convention 
+# ---------------------------------------------------------
+get_simulation_id = function(sim) {
+  
+  browser()
+  
+  # Format IDs from details, padding EIR and seed values
+  ids = paste(sim$country, 
+              sim$eir  %>% str_pad(4, pad = "0"), 
+              sim$seed %>% str_pad(3, pad = "0"), 
+              sim$scenario, 
+              sep = "_")
+  
+  return(ids)
+}
+  
+  
+# ---------------------------------------------------------
+# All steps to actually simulate the model
+# ---------------------------------------------------------
+run_sim = function(job_id) {  
+  
+  browser()
   
   # ---- Run model for SIA activities ----
   
