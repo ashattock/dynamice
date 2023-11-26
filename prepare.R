@@ -49,14 +49,14 @@ prepare_params = function(data) {
 # ---------------------------------------------------------
 # Load data for this country and this scenario
 # ---------------------------------------------------------
-prepare_data = function(country, scenario) {
+prepare_data = function(sim) {
   
   # ---- Coverage data ----
   
   # Coverage data for this scenario and country
   d = list(
-    coverage_routine = load_coverage(country, scenario, "routine"), 
-    coverage_sia     = load_coverage(country, scenario, "sia"))
+    coverage_routine = load_coverage(sim, "routine"), 
+    coverage_sia     = load_coverage(sim, "sia"))
   
   # ---- Load other input data for this country ----
   
@@ -74,22 +74,35 @@ prepare_data = function(country, scenario) {
     
     # Filter datatable for this country
     if (is.data.frame(data))
-      d[[ref]] = filter(data, country == !!country)
+      d[[ref]] = data[country == sim$country]
     
     # ... or select list element for this country
     if (!is.data.frame(data))
-      d[[ref]] = data[[country]]
+      d[[ref]] = data[[sim$country]]
   }
   
-  # ---- Possible data overwrites ----
+  # ---- Set basic reproduction number ----
+  
+  # If provided, use scenario-specific R0
+  if (!is.na(sim$r0))
+    d$r0 = sim$r0
+  
+  # If not provided but fixed, use user-defined R0
+  if (is.na(sim$r0) && !is.na(o$fix_r0))
+    d$r0 = o$fix_r0
+  
+  # If not provided nor fixed, use country-specific R0
+  if (is.na(sim$r0) && is.na(o$fix_r0))
+    d$r0 = d$rnought$r0
+  
+  # Remove now-redundant data
+  d$rnought = NULL
+  
+  # ---- Other data considerations ----
 
   # Update timeliness if MCV1 not given at 39 weeks (9 months)
   if (d$vax_age$mcv1 != 39)
     d$timeliness[!is.na(age), timeliness := ifelse(age < d$vax_age$mcv1, 0, 1)]
-  
-  # Assume a fixed R0 if requested
-  if (!is.na(o$fix_r0))
-    d$rnought[, r0 := o$fix_r0]
   
   return(d)
 }
@@ -97,15 +110,15 @@ prepare_data = function(country, scenario) {
 # ---------------------------------------------------------
 # Load coverage data
 # ---------------------------------------------------------
-load_coverage = function(country, scenario, type) {
+load_coverage = function(sim, type) {
   
   # Construct file name and path
-  file_name = paste1(type, scenario)
+  file_name = paste1(type, sim$scenario)
   file_path = paste0(o$pth$coverage, file_name, ".csv")
   
   # Load coverage data and filter for years of interest
   coverage_data = fread(file_path) %>%
-    filter(country_code %in% !!country, 
+    filter(country_code %in% sim$country, 
            year %in% o$years) %>%
     select(country = country_code, vaccine, year, coverage)
   

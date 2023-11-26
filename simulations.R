@@ -56,31 +56,25 @@ run_simulations = function() {
 # ---------------------------------------------------------
 get_simulations = function() {
   
+  # ---- Sanity check on scenario selection ----
+  
   # Load all scenarios from config file
   scenarios = fread(paste0(o$pth$config, "scenarios.csv"))
   
-  # Interpretatiion of set_routine
-  #  0: no routine MCV
-  #  1: MCV1 only
-  #  2: MCV1 + MCV2
+  # Throw an error if any unrecognised scenarios
+  unknown = setdiff(o$scenarios, scenarios$scenario)
+  if (length(unknown) > 0)
+    stop("Unrecognised scenarios defined: ", paste(unknown, collapse = ", "))
   
-  # Interpretatiion of set_sia
-  #  0: no SIA
-  #  1: random reach (baseline assumption)
-  #  2: 7.7% less likely to be reached at national level
-  #  3: zero-dose first
-  #  4: already-vaccinated first
-  #  5: 7.7% less likely to be reached at subnational level
+  # ---- Full set of simulations ----
   
   # Grid of countries and scenarios to run
   sims = expand_grid(country  = o$countries, 
-                     scenario = o$scenarios) %>%
-    # Append scenario vaccination details...
-    left_join(y  = scenarios, 
-              by = "scenario") %>%
-    select(-scenario_name) %>%
+                     scenario = o$scenarios, 
+                     r0 = c(NA, o$vary_r0)) %>%
     # Append scenario ID...
-    mutate(id = paste1(country, set_routine, set_sia, scenario)) %>%
+    mutate(id = get_simulation_id(.), 
+           .before = 1) %>%
     arrange(scenario, country) %>%
     as.data.table()
   
@@ -120,71 +114,67 @@ get_simulations = function() {
   
   return(sims)
 }
+
+# ---------------------------------------------------------
+# Create simulation ID convention 
+# ---------------------------------------------------------
+get_simulation_id = function(sim) {
+  
+  # Combine scenario details to create sim ID
+  ids = sim %>%
+    mutate(r0_str = ifelse(is.na(r0), "def", r0),
+           r0_str = str_pad(r0_str, 2, pad = "0")) %>%
+    mutate(id = paste1(country, r0_str, scenario)) %>%
+    pull(id)
+  
+  return(ids)
+}
   
 # ---------------------------------------------------------
 # All steps to actually simulate the model
 # ---------------------------------------------------------
-run_sim = function(job_id) {  
+run_sim = function(job_id) {
   
-  # Load all scenarios and select the one assocaited with job_id
-  sims = readRDS(paste0(o$pth$sims, "all_simulations.rds"))
-  sim  = sims[job_id, ] # sims[job_num == job_id, ]
+  # ---- Details of this simulation ----
+  
+  # Load full scenario vaccination details
+  scenarios_dt = fread(paste0(o$pth$config, "scenarios.csv"))
+  
+  # Load full set of simulations
+  sims_dt = readRDS(paste0(o$pth$sims, "all_simulations.rds"))
+  
+  # Select simulation assocaited with this job_id
+  sim = sims_dt %>%
+    slice(job_id) %>% # filter(job_num == job_id)
+    left_join(y  = scenarios_dt, 
+              by = "scenario") %>%
+    select(-scenario_name)
+  
+  # Interpretatiion of set_routine
+  #  0: no routine MCV
+  #  1: MCV1 only
+  #  2: MCV1 + MCV2
+  
+  # Interpretatiion of set_sia
+  #  0: no SIA
+  #  1: random reach (baseline assumption)
+  #  2: 7.7% less likely to be reached at national level
+  #  3: zero-dose first
+  #  4: already-vaccinated first
+  #  5: 7.7% less likely to be reached at subnational level
   
   message(" > Simulating: ", sim$id)
   
-  # ---- Run model for SIA activities ----
+  # ---- Simulate model ----
+  
+  # Run DynaMICE model
+  model(sim)  # See model.R
   
   browser()
   
-  for (ir0 in c(seq(6,26,2))) {
-    # vary R0 values
-    data_r0 <- copy (data_r0) [ , r0 := ir0]
-    source ("R/functions_rcpp.R")
-    
-    if (ir0 %in% c(6,16,26)){
-      sel_scns <- c(2,3,4,5)
-    } else {
-      sel_scns <- 2
-    }
-    
-    for (index in sel_scns){
-      
-      scenario_name   <- scenarios [index]
-      scenario_number <- sprintf ("scenario%02d", index)
-      
-      # run model and estimate cases
-      burden_estimate_file <- runScenario_rcpp (
-        scenario_name = scenario_name,
-        routine   = set_routine[index],
-        using_sia     = set_sia[index])
-      
-      # separately estimate deaths
-      burden_estimate_file <- paste0 ("central_burden_estimate_",
-                                      scenario_name, ".csv")
-      
-      # merge outputs into csv files
-      get_burden_estimate(
-        scenario_name              = scenarios [index],
-        save_scenario              = sprintf ("scenario%02d", index),
-        routine                = set_routine [index],
-        using_sia                  = set_sia         [index],
-        folder_date                = "20230401")
-      
-      # rename file
-      file.rename (from = paste0(o$pth$central, burden_estimate_file),
-                   to = paste0(o$pth$central,
-                               "central_burden_estimate_",
-                               scenario_name,
-                               "_r0-", ir0, ".csv"))
-    }
-  }
+  # merge outputs into csv files
+  get_burden_estimate(sim)
   
   browser()
-  
-  # move files to a specified folder
-  res_files <- list.files(o$pth$central)
-  dir.create (paste0 ("previous_res/20230401/siareach_2/senanl_r0"))
-  file.rename (from = paste0(o$pth$central, res_files),
-               to = paste0("previous_res/20230401/siareach_2/senanl_r0/", res_files))
 }
 

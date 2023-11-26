@@ -27,14 +27,12 @@ runScenario_rcpp <- function (
 # ------------------------------------------------------------------------------
 # Run measles model for a given country and scenario
 # ------------------------------------------------------------------------------
-model = function(iso3, scenario_name, routine, using_sia) {
-  
-  browser()
+model = function(sim) { # iso3, scenario_name, routine, using_sia) {
   
   # ---- Load data and parameters ----
   
   # Model input data
-  d = prepare_data(iso3, scenario_name)
+  d = prepare_data(sim)
   
   # Global model parameters
   p = prepare_params(d)
@@ -257,6 +255,8 @@ model = function(iso3, scenario_name, routine, using_sia) {
     reachs0d = rbind(colSums(reach0_out[1:52,]), colSums(reach0_out[53:104,]), colSums(reach0_out[105:156,]), reach0_out[157:254,]),
     fvps     = rbind(colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,]))
   
+  browser()
+  
   save_name = paste1(iso3, scenario_name, routine, using_sia)
   save_file = paste0(o$pth$sims, save_name, ".rds")
   
@@ -267,15 +267,9 @@ model = function(iso3, scenario_name, routine, using_sia) {
 # ------------------------------------------------------------------------------
 # Create burden estimate csv files
 # ------------------------------------------------------------------------------
-get_burden_estimate <- function (
-    scenario_name,
-    save_scenario,
-    log_name,
-    routine,
-    using_sia,
-    folder_date,
-    data
-) {
+get_burden_estimate = function(sim) {
+  
+  # TODO: Split this up a bit - do DALYs then save VIMC outputs
   
   browser()
   
@@ -443,6 +437,5 @@ get_burden_estimate <- function (
   
   # release memory for the next round
   remove (list = c("all_runs", "sel_countries"))
-  
-  message("burden estimate csv file generated")
 }
+
