@@ -5,25 +5,6 @@
 #
 ###########################################################
 
-runScenario_rcpp <- function (
-    scenario_name,
-    routine,            # Whether children are vaccinated. 0: No vaccination; 1: Only MCV1; 2: MCV1 and MCV2
-    using_sia) {              # Whether supplementary immunization campaigns are used. 0: no SIA; 1: with SIA  (Portnoy), 2: with SIA (7.7%)
-  
-  # ----------------------------------------------------------------------------
-  # Run model
-  # ----------------------------------------------------------------------------
-  for (iso3 in o$countries) {
-    out_run <- model(
-      iso3          = iso3,
-      scenario_name = scenario_name, 
-      routine   = routine,
-      using_sia     = using_sia)
-    
-    browser()
-  }
-}
-
 # ------------------------------------------------------------------------------
 # Run measles model for a given country and scenario
 # ------------------------------------------------------------------------------
