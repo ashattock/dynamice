@@ -96,7 +96,7 @@ get_simulations = function() {
   # 0: no routine MCV
   # 1: MCV1 only
   # 2: MCV1 + MCV2
-  set_vaccination <- c (0, 1, 2, 2, 1, 2, 2, 2, 2, 1, 1, 2, 2)
+  set_routine <- c (0, 1, 2, 2, 1, 2, 2, 2, 2, 1, 1, 2, 2)
   
   # ---- Generate vaccine coverage scenarios ----
   
@@ -193,7 +193,7 @@ run_sim = function(job_id) {
       # run model and estimate cases
       burden_estimate_file <- runScenario_rcpp (
         scenario_name          = scenario_name,
-        vaccination            = set_vaccination[index],
+        routine            = set_routine[index],
         using_sia              = set_sia[index])
       
       browser()
@@ -207,7 +207,7 @@ run_sim = function(job_id) {
         # vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
         scenario_name              = vac_strategies [index],
         save_scenario              = scenario_number,
-        vaccination                = set_vaccination [index],
+        routine                = set_routine [index],
         using_sia                  = set_sia         [index],
         folder_date                = "20230401")
     }
@@ -243,7 +243,7 @@ run_sim = function(job_id) {
       # run model and estimate cases
       burden_estimate_file <- runScenario_rcpp (
         scenario_name = scenario_name,
-        vaccination   = set_vaccination[index],
+        routine   = set_routine[index],
         using_sia     = set_sia[index])
       
       # separately estimate deaths
@@ -254,7 +254,7 @@ run_sim = function(job_id) {
       get_burden_estimate(
         scenario_name              = vac_strategies [index],
         save_scenario              = sprintf ("scenario%02d", index),
-        vaccination                = set_vaccination [index],
+        routine                = set_routine [index],
         using_sia                  = set_sia         [index],
         folder_date                = "20230401")
       

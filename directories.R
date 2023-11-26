@@ -23,10 +23,9 @@ prepare_dirs = function(o) {
   # ---- Input and configuration directories ----
 
   # Parent path of all input files
-  # pth$input    = file.path(pth$code, "input")
   pth$config   = file.path(pth$code, "config")
-  pth$data     = file.path(pth$code, "data")
-  pth$coverage = file.path(pth$code, "coverage")
+  pth$input    = file.path(pth$code, "input")
+  pth$coverage = file.path(pth$input, "coverage") # Subdir of input
 
   # ---- Output directories ----
 

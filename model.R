@@ -7,7 +7,7 @@
 
 runScenario_rcpp <- function (
     scenario_name,
-    vaccination,            # Whether children are vaccinated. 0: No vaccination; 1: Only MCV1; 2: MCV1 and MCV2
+    routine,            # Whether children are vaccinated. 0: No vaccination; 1: Only MCV1; 2: MCV1 and MCV2
     using_sia) {              # Whether supplementary immunization campaigns are used. 0: no SIA; 1: with SIA  (Portnoy), 2: with SIA (7.7%)
   
   # ----------------------------------------------------------------------------
@@ -17,7 +17,7 @@ runScenario_rcpp <- function (
     out_run <- model(
       iso3          = iso3,
       scenario_name = scenario_name, 
-      vaccination   = vaccination,
+      routine   = routine,
       using_sia     = using_sia)
     
     browser()
@@ -27,11 +27,11 @@ runScenario_rcpp <- function (
 # ------------------------------------------------------------------------------
 # Run measles model for a given country and scenario
 # ------------------------------------------------------------------------------
-model = function(iso3, scenario_name, vaccination, using_sia) {
+model = function(iso3, scenario_name, routine, using_sia) {
   
   # NOTES ON INPUTS: 
   #
-  # vaccination := A numeric indicator that determines vaccination programmes
+  # routine := A numeric indicator that determines vaccination programmes
   # for children: 0 - No vaccination, 1 - Only MCV1,  2 - MCV1 and MCV2.
   #
   # using_sia := A numeric indicator that determines whether supplementary
@@ -147,7 +147,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     
     # ---- Coverage and timeliness ----
     
-    if (vaccination >= 1) {
+    if (routine >= 1) {
       
       # Maximum coverage can (obviously) only be 100%
       # To estimate proportion that is vaccinated at each week, we first calculate the number of individuals remaining susceptible
@@ -181,7 +181,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
       country_year_timeliness_mcv1_allages <- rep(0, 254)
     }
     
-    if(vaccination == 2){
+    if (routine == 2) {
       country_year_mcv2 <- d$coverage_routine [year == y & vaccine == "MCV2", coverage]
     } else {
       country_year_mcv2 <- 0
@@ -267,7 +267,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     reachs0d = rbind(colSums(reach0_out[1:52,]), colSums(reach0_out[53:104,]), colSums(reach0_out[105:156,]), reach0_out[157:254,]),
     fvps     = rbind(colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,]))
   
-  save_name = paste1(iso3, scenario_name, vaccination, using_sia)
+  save_name = paste1(iso3, scenario_name, routine, using_sia)
   save_file = paste0(o$pth$sims, save_name, ".rds")
   
   # Save model output
@@ -281,7 +281,7 @@ get_burden_estimate <- function (
     scenario_name,
     save_scenario,
     log_name,
-    vaccination,
+    routine,
     using_sia,
     folder_date,
     data
@@ -294,7 +294,7 @@ get_burden_estimate <- function (
   # define folder name
   foldername <- paste0 (
     folder_date,
-    "_v", vaccination,
+    "_v", routine,
     "_s", using_sia,
     "_deter")
   
@@ -303,7 +303,7 @@ get_burden_estimate <- function (
                               recursive = T, full.names = T)
   
   # Load VIMC results template 
-  data_template = readRDS(paste0(o$pth$data, "data_template.rds"))
+  data_template = readRDS(paste0(o$pth$input, "template.rds"))
   
   # set up format of output file
   years          <- o$years

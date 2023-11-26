@@ -60,8 +60,8 @@ prepare_data = function(country, scenario) {
   
   # ---- Load other input data for this country ----
   
-  # All data rds files in data directory
-  data_files = list.files(o$pth$data, pattern = "^data_.+\\.rds$")
+  # All data rds files in inupt directory
+  data_files = list.files(o$pth$input, pattern = "^data_.+\\.rds$")
   
   # Loop through files
   for (file in data_files) {
@@ -70,7 +70,7 @@ prepare_data = function(country, scenario) {
     ref = str_remove_all(file, "(^data_|.rds$)")
     
     # Load data file
-    data = readRDS(paste0(o$pth$data, file))
+    data = readRDS(paste0(o$pth$input, file))
     
     # Filter datatable for this country
     if (is.data.frame(data))
