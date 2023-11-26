@@ -25,9 +25,7 @@ run_simulations = function() {
   # ---- Submit simulations to cluster ----
   
   # Number of jobs to be run
-  n_jobs = nrow(sims) # sum(sims$run)
-  
-  browser()
+  n_jobs = sum(sims$run)
   
   # Skip if nothing to run
   if (n_jobs > 0) {
@@ -42,8 +40,6 @@ run_simulations = function() {
     if (o$rm_cluster_log) 
       unlink(paste0(o$pth$log, "*"), force = TRUE)
   }
-  
-  browser()
   
   # ---- Concatenate output ----
   
@@ -80,37 +76,38 @@ get_simulations = function() {
   
   # ---- Skip existing sims ----
   
-  # message(" > Identifying previously completed simulations")
-  # 
-  # # Extract IDs of sims that have already been run for each country
-  # exist_pth = o$pth[[paste1("post", timeframe)]]
-  # exist_id  = str_remove(list.files(exist_pth), ".rds$")
-  # 
-  # # Logical whether simulation should be run / rerun
-  # run_sim = !(sims$id %in% exist_id)
-  # if (o$overwrite) run_sim[] = TRUE
-  # 
-  # # Skip any existing sims (unless overwriting)
-  # sims %<>%
-  #   cbind(run = run_sim) %>%
-  #   mutate(job_num = cumsum(run * 1), 
-  #          job_num = ifelse(run, job_num, NA))
+  message(" > Identifying previously completed simulations")
+
+  # Extract IDs of sims that have already been run
+  exist_id = intersect(
+    str_remove(list.files(o$pth$sims),   ".rds$"), 
+    str_remove(list.files(o$pth$burden), ".rds$"))
+
+  # Logical whether simulation should be run / rerun
+  run_sim = !(sims$id %in% exist_id)
+  if (o$overwrite) run_sim[] = TRUE
+
+  # Skip any existing sims (unless overwriting)
+  sims %<>%
+    cbind(run = run_sim) %>%
+    mutate(job_num = cumsum(run * 1),
+           job_num = ifelse(run, job_num, NA))
   
   # Save scenario dataframe to file
   saveRDS(sims, file = paste0(o$pth$sims, "all_simulations.rds"))
   
   # ---- Display number of sims ----
   
-  # # Number of sims
-  # n_total = nrow(sims)
-  # n_run   = sum(sims$run)
-  # 
-  # # Report total number of sims
-  # message(" > Total number of simulations: ", thou_sep(n_total))
-  # 
-  # # Report number of sims we'll run now
-  # message("  - Skipping: ", thou_sep(n_total - n_run))
-  # message("  - Simulating: ", thou_sep(n_run))
+  # Number of sims
+  n_total = nrow(sims)
+  n_run   = sum(sims$run)
+
+  # Report total number of sims
+  message(" > Total number of simulations: ", thou_sep(n_total))
+
+  # Report number of sims we'll run now
+  message("  - Skipping: ", thou_sep(n_total - n_run))
+  message("  - Simulating: ", thou_sep(n_run))
   
   return(sims)
 }
@@ -145,7 +142,7 @@ run_sim = function(job_id) {
   
   # Select simulation assocaited with this job_id
   sim = sims_dt %>%
-    slice(job_id) %>% # filter(job_num == job_id)
+    filter(job_num == job_id) %>%
     left_join(y  = scenarios_dt, 
               by = "scenario") %>%
     select(-scenario_name)
