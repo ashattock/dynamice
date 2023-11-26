@@ -57,7 +57,6 @@ create_coverage = function() {
   }
 }
 
-
 # ------------------------------------------------------------------------------
 #' Expand the matrix to a different dimension
 #
@@ -114,58 +113,5 @@ expandMatrix <- function (A,
   return (B)
   
 } # end of function -- expandMatrix
-# ------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------------------------------
-#' Tailor the data structure for life expectancy by age and year
-#'
-#' Tailor the \code{\link{data_lexp_remain}} data to the format for processing burden
-#' estimates. Linear interpolation between calender years was applied.
-# ------------------------------------------------------------------------------
-#' @param sel_countries ISO-3 codes for countries included for evaluation. If
-#' "all", all countries in the original data are selected.
-#'
-#' @import data.table
-#'
-#' @examples
-#' lexp_remain <- tailor_data_lexp_remain (sel_countries = c("AGO","BGD"))
-tailor_data_lexp_remain <- function (sel_countries = "all"){
-  
-  lexp_remain <- setDT (data_lexp_remain)
-  lexp_remain <- lexp_remain [year >= 1980]
-  
-  if (sel_countries[[1]] != "all") {
-    lexp_remain <- lexp_remain [country_code %in% sel_countries]
-  }
-  
-  # copy values for year 2095 to year 2100
-  lexp_remain <- rbind (lexp_remain, copy (lexp_remain [year == 2095])[, year := 2100])
-  
-  # calculate the difference between years
-  setorder (lexp_remain, country_code, age_from, year)
-  lexp_remain [ , diffy := value - shift(value) , by = .(country_code, age_from)]
-  
-  # interpolate a linear trend for between-years
-  lexp_remain_yr <- copy (lexp_remain) [year == 1980]
-  for (btwyr in 0:4) {
-    dt <- copy (lexp_remain) [year != 1980]
-    dt [, `:=` (year = year - btwyr,
-                value = value - btwyr*(diffy/5))]
-    
-    lexp_remain_yr <- rbind (lexp_remain_yr, dt)
-  }
-  
-  # interpolate a linear trend for between-ages
-  setorder (lexp_remain_yr, country_code, year, age_from)
-  lexp_remain_yr [ , age_mean := (age_from + age_to)/2]
-  
-  lexp_remain_full <- lexp_remain_yr [, .(value = approx(age_mean, value, xout = 0:100)$y),
-                                      by = .(country_code, country, year)]
-  lexp_remain_full [, age := rep(0:100, length(unique(year))*length(unique(country_code)))]
-  
-  return (lexp_remain_full)
-  
-} # end of function -- tailor_data_lexp_remain
 # ------------------------------------------------------------------------------
 

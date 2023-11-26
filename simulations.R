@@ -164,7 +164,5 @@ run_sim = function(job_id) {
   
   # Estimate disease burden from model outcomes
   run_burden(sim, data)  # See model.R
-  
-  browser()
 }
 

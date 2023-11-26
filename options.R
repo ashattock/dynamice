@@ -43,6 +43,12 @@ set_options = function(do_step = NA, quiet = FALSE) {
   
   # Vary R0 for uncertainty simulations
   o$vary_r0 = seq(6, 26, 2)
+  
+  # Disability for non-fatal case
+  #
+  # TODO: Ask what this represents, assuming the product of disability
+  #       weight and average duration of infection until recovery
+  o$disability_weight = 0.002
 
   # ---- Data settings ----
   

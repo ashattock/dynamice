@@ -35,8 +35,8 @@ prepare_dirs = function(o) {
 
   # Path to model output, results, and figures
   pth$sims    = set_pth("output", "1_simulations")
-  pth$central = set_pth("output", "2_central")
-  pth$uncert  = set_pth("output", "3_uncertainty")
+  pth$burden  = set_pth("output", "2_burden")
+  pth$results = set_pth("output", "3_results")
   pth$figures = set_pth("output", "4_figures")
   
   # Directory for cluster logs

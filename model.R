@@ -109,7 +109,7 @@ run_model = function(sim, data) {
     
     # ---- Coverage and timeliness ----
     
-    # Interpretatiion of set_routine
+    # Interpretation of set_routine
     #  0: no routine MCV
     #  1: MCV1 only
     #  2: MCV1 + MCV2
@@ -158,7 +158,7 @@ run_model = function(sim, data) {
     #   country_year_mcv2 <- 0
     # }
     
-    # Interpretatiion of set_sia
+    # Interpretation of set_sia
     #  0: no SIA
     #  1: random reach (baseline assumption)
     #  2: 7.7% less likely to be reached at national level
@@ -258,8 +258,8 @@ run_model = function(sim, data) {
     doses    = as.vector(output$doses),
     reachs0d = as.vector(output$reachs0d),
     fvps     = as.vector(output$fvps))
-    
-    # Save model output
+  
+  # Save model output
   saveRDS(output_dt, file = paste0(o$pth$sims, sim$id, ".rds"))
 }
 
@@ -268,277 +268,60 @@ run_model = function(sim, data) {
 # ------------------------------------------------------------------------------
 run_burden = function(sim, data) {
   
-  # Save model output
+  # Load already simulated model output
   model_output = readRDS(paste0(o$pth$sims, sim$id, ".rds"))
   
-  browser()
+  # Case fatality rate - some filling needed
+  cfr_dt = expand_grid(year = o$years, 
+                       age  = o$ages) %>%
+    mutate(country = sim$country) %>%
+    # Append CFR data...
+    left_join(y  = data$cfr_portnoy_21, 
+              by = c("year", "age", "country")) %>%
+    # Fill missing years...
+    group_by(age) %>%
+    fill(cfr, .direction = "downup") %>%
+    ungroup() %>%
+    # Fill missing ages...
+    group_by(year) %>%
+    fill(cfr, .direction = "downup") %>%
+    ungroup() %>%
+    # Tidy up...
+    select(year, age, cfr) %>%
+    as.data.table()
   
-  # remaining life expectancy
-  lexp_remain <- tailor_data_lexp_remain(sim$country)
+  # Life years remaining - bound below by zero
+  life_remain_dt = data$life_exp %>%
+    filter(year %in% o$years) %>%
+    expand_grid(age = o$ages) %>%
+    mutate(life_remain = pmax(value - age, 0)) %>%
+    select(year, age, life_remain) %>%
+    as.data.table()
   
+  # Calculate DALYs
+  dalys_dt = model_output %>%
+    mutate(cases = cases0d + cases1d + cases2d) %>%
+    select(id, year, age, cases) %>%
+    # Calculate number of deaths...
+    left_join(y  = cfr_dt, 
+              by = c("year", "age")) %>%
+    mutate(deaths = cases * cfr) %>%
+    # Calculate years of life lost (YLL)...
+    left_join(y  = life_remain_dt, 
+              by = c("year", "age")) %>%
+    mutate(yll = deaths * life_remain) %>%
+    # Calculate years of life with disability (YLD)...
+    mutate(yld = o$disability_weight * (cases - deaths)) %>%
+    # Finally, calculate DALYs...
+    mutate(dalys = yll + yld) %>%
+    # Tidy up...
+    select(id, year, age, deaths, yll, dalys) %>%
+    pivot_longer(cols = c(deaths, yll, dalys),
+                 names_to = "metric") %>%
+    arrange(metric, year, age) %>%
+    as.data.table()
   
-  all_runs <- lexp_remain [all_runs,
-                           .(i.country, year, age, cases0d, cases1d, cases2d,
-                             pops, pops0d, popsSus,  doses, reachs0d, fvps,
-                             country_name, disease, value),
-                           on = .(country_code = country,
-                                  age          = age,
-                                  year         = year)]
-  
-  # rename column names for output
-  setnames (all_runs,
-            old = c("i.country", "value"      ),
-            new = c("country"  , "remain_lexp"))
-  
-  
-  # MCV1 coverage
-  coverage_routine_MCV1 <- coverage_routine [(vaccine == "MCV1") & (country_code %in% sel_countries)]
-  
-  all_runs <- coverage_routine_MCV1 [all_runs,
-                                     .(i.country, i.year, age,
-                                       cases0d, cases1d, cases2d,
-                                       pops, pops0d, popsSus,
-                                       doses, reachs0d, fvps, country_name,
-                                       disease, coverage, remain_lexp),
-                                     on = .(country_code = country,
-                                            year         = year) ]
-  
-  
-  # rename column "coverage" to "MCV1"
-  setnames (x = all_runs,
-            old = c("i.country", "i.year", "coverage"),
-            new = c("country"  , "year"  , "MCV1"    ))
-  
-  browser() # Use data$cfr here
-  
-  # ---- calculate deaths and DALYs ----
-  data_cfr_21 <- setDT (copy (data_cfr_portnoy_21))
-  
-  # The data contains CFR estimates between 1981 and 2020, for age between 0 to 99.
-  # Extrapolate CFRs for year 1980 and 2021-2100 and for age 100.
-  
-  min_year = min (all_runs [, year])
-  max_year = max (all_runs [, year])
-  data_cfr_21 <- data_cfr_21 [year %in% min_year:max_year & country %in% sel_countries]
-  
-  if (min_year < 1981) {
-    data_cfr_add <- rbindlist (lapply (min_year:1981, function(i) copy (data_cfr_21 [year == 1981, ])[, year := i]))
-    data_cfr_21  <- rbind     (data_cfr_add, data_cfr_21, use.names = TRUE)
-  }
-  
-  if (max_year > 2020) {
-    data_cfr_add <- rbindlist (lapply (2021:max_year, function(i) copy (data_cfr_21 [year == 2020, ])[, year := i]))
-    data_cfr_21  <- rbind     (data_cfr_21, data_cfr_add, use.names = TRUE)
-  }
-  
-  data_cfr_21  <- rbind (data_cfr_21,
-                         copy (data_cfr_21 [age == 99, ])[, age := 100],
-                         use.names = TRUE)
-  setorder (data_cfr_21, country, year, age)
-  
-  all_runs <- data_cfr_21 [all_runs,
-                           .(disease, year, age, country, country_name,
-                             pops, pops0d, popsSus, cases0d, cases1d, cases2d, doses,
-                             reachs0d, fvps, cfr, remain_lexp),
-                           on = .(country = country,
-                                  year    = year,
-                                  age     = age)]
-  
-  # estimate deaths
-  all_runs [, `:=` (deaths0d = cases0d * cfr,
-                    deaths1d = cases1d * cfr,
-                    deaths2d = cases2d * cfr)]
-  
-  # calculate DALYs = (YLDs) + (YLLs)
-  all_runs [, dalys := (((cases0d+cases1d+cases2d) - (deaths0d+deaths1d+deaths2d)) * 0.002) +
-              ((deaths0d+deaths1d+deaths2d) * remain_lexp)]
-  
-  # adjust columns for output
-  select.cols <- c("disease", "country", "country_name", "year", "age",
-                   "pops", "pops0d", "popsSus",
-                   "cases0d", "cases1d", "cases2d", "deaths0d", "deaths1d", "deaths2d",
-                   "dalys", "doses", "reachs0d", "fvps")
-  all_runs <- subset (all_runs, select = select.cols)
-  
-  # save burden estimates to file
-  fwrite(x    = all_runs[order(country, year, age)],
-         file = paste0(o$pth$central, burden_estimate_file, ".csv"))
-  
-  
-  # release memory for the next round
-  remove (list = c("all_runs", "sel_countries"))
-}
-
-# ------------------------------------------------------------------------------
-# Create VIMC results files
-# ------------------------------------------------------------------------------
-create_vimc_output = function() {
-  
-  browser() # Only some of this is relevant...
-  
-  # ---- Merge and process results ----
-  
-  # define folder name
-  foldername <- paste0 (
-    folder_date,
-    "_v", sim$set_routine,
-    "_s", sim$set_sia,
-    "_deter")
-  
-  # merge results
-  output_files <- list.files (path = paste0 ("outcome/", save_scenario, "/",foldername,"/"),
-                              recursive = T, full.names = T)
-  
-  # Load VIMC results template 
-  data_template = readRDS(paste0(o$pth$input, "template.rds"))
-  
-  # set up format of output file
-  years          <- o$years
-  ages           <- 0 : 100
-  template    	 <- copy (setDT (data_template)) [year %in% years]   # drop rows if simulation period is shorter
-  report_years   <- sort (unique (template$year))
-  country_names  <- unique (subset (template, select = c("country", "country_name")))
-  c_names        <- country_names$country_name
-  names(c_names) <- country_names$country
-  
-  # file name for burden estimates
-  burden_estimate_file <- paste0 ("central_burden_estimate_", scenario_name)
-  
-  browser() # We may want to load coverage for all countries here...
-  
-  # coverage file
-  coverage_routine <- copy(fread(paste0(o$pth$coverage,
-                                        "routine_",
-                                        scenario_name,
-                                        ".csv")))
-  
-  # read RDS files
-  all_runs <- rbindlist (lapply (output_files, function (filename, ...) {
-    res <- withCallingHandlers (
-      readRDS (filename),
-      warning = function(w) {warning(w, filename);}
-    )
-    filefinal <- stringr::str_extract (filename, "[^/]+$")      # remove path but keep filename
-    res2 <- data.table (country     = rep (stringr::str_sub(filefinal, 1, 3), length(ages)*length(years)), # 101 ages * 121 years
-                        year        = rep (years, each = length(ages)),
-                        age         = rep (ages, length(years)),
-                        #cases       = as.vector(res$cases),
-                        cases0d     = as.vector(res$cases0d),
-                        cases1d     = as.vector(res$cases1d),
-                        cases2d     = as.vector(res$cases2d),
-                        pops        = as.vector(res$pops),
-                        pops0d      = as.vector(res$pops0d),
-                        popsSus     = as.vector(res$popsSus),
-                        doses       = as.vector(res$doses),
-                        reachs0d    = as.vector(res$reachs0d),
-                        fvps        = as.vector(res$fvps)
-    )
-    return (res2)
-  }))
-  
-  # add country names and disease (Measles) to match template file
-  all_runs[, c("country_name", "disease") := list (c_names[country], "Measles")]
-  
-  # select output years
-  all_runs <- subset (all_runs, year %in% report_years)
-  
-  # ---- add columns for remaining life expectancy & MCV1 ----
-  
-  sel_countries <- unique (all_runs$country)
-  
-  # remaining life expectancy
-  lexp_remain <- tailor_data_lexp_remain (sel_countries)
-  
-  
-  all_runs <- lexp_remain [all_runs,
-                           .(i.country, year, age, cases0d, cases1d, cases2d,
-                             pops, pops0d, popsSus,  doses, reachs0d, fvps,
-                             country_name, disease, value),
-                           on = .(country_code = country,
-                                  age          = age,
-                                  year         = year)]
-  
-  # rename column names for output
-  setnames (all_runs,
-            old = c("i.country", "value"      ),
-            new = c("country"  , "remain_lexp"))
-  
-  
-  # MCV1 coverage
-  coverage_routine_MCV1 <- coverage_routine [(vaccine == "MCV1") & (country_code %in% sel_countries)]
-  
-  all_runs <- coverage_routine_MCV1 [all_runs,
-                                     .(i.country, i.year, age,
-                                       cases0d, cases1d, cases2d,
-                                       pops, pops0d, popsSus,
-                                       doses, reachs0d, fvps, country_name,
-                                       disease, coverage, remain_lexp),
-                                     on = .(country_code = country,
-                                            year         = year) ]
-  
-  
-  # rename column "coverage" to "MCV1"
-  setnames (x = all_runs,
-            old = c("i.country", "i.year", "coverage"),
-            new = c("country"  , "year"  , "MCV1"    ))
-  
-  browser() # Use data$cfr here
-  
-  # ---- calculate deaths and DALYs ----
-  data_cfr_21 <- setDT (copy (data_cfr_portnoy_21))
-  
-  # The data contains CFR estimates between 1981 and 2020, for age between 0 to 99.
-  # Extrapolate CFRs for year 1980 and 2021-2100 and for age 100.
-  
-  min_year = min (all_runs [, year])
-  max_year = max (all_runs [, year])
-  data_cfr_21 <- data_cfr_21 [year %in% min_year:max_year & country %in% sel_countries]
-  
-  if (min_year < 1981) {
-    data_cfr_add <- rbindlist (lapply (min_year:1981, function(i) copy (data_cfr_21 [year == 1981, ])[, year := i]))
-    data_cfr_21  <- rbind     (data_cfr_add, data_cfr_21, use.names = TRUE)
-  }
-  
-  if (max_year > 2020) {
-    data_cfr_add <- rbindlist (lapply (2021:max_year, function(i) copy (data_cfr_21 [year == 2020, ])[, year := i]))
-    data_cfr_21  <- rbind     (data_cfr_21, data_cfr_add, use.names = TRUE)
-  }
-  
-  data_cfr_21  <- rbind (data_cfr_21,
-                         copy (data_cfr_21 [age == 99, ])[, age := 100],
-                         use.names = TRUE)
-  setorder (data_cfr_21, country, year, age)
-  
-  all_runs <- data_cfr_21 [all_runs,
-                           .(disease, year, age, country, country_name,
-                             pops, pops0d, popsSus, cases0d, cases1d, cases2d, doses,
-                             reachs0d, fvps, cfr, remain_lexp),
-                           on = .(country = country,
-                                  year    = year,
-                                  age     = age)]
-  
-  # estimate deaths
-  all_runs [, `:=` (deaths0d = cases0d * cfr,
-                    deaths1d = cases1d * cfr,
-                    deaths2d = cases2d * cfr)]
-  
-  # calculate DALYs = (YLDs) + (YLLs)
-  all_runs [, dalys := (((cases0d+cases1d+cases2d) - (deaths0d+deaths1d+deaths2d)) * 0.002) +
-              ((deaths0d+deaths1d+deaths2d) * remain_lexp)]
-  
-  # adjust columns for output
-  select.cols <- c("disease", "country", "country_name", "year", "age",
-                   "pops", "pops0d", "popsSus",
-                   "cases0d", "cases1d", "cases2d", "deaths0d", "deaths1d", "deaths2d",
-                   "dalys", "doses", "reachs0d", "fvps")
-  all_runs <- subset (all_runs, select = select.cols)
-  
-  # save burden estimates to file
-  fwrite(x    = all_runs[order(country, year, age)],
-         file = paste0(o$pth$central, burden_estimate_file, ".csv"))
-  
-  
-  # release memory for the next round
-  remove (list = c("all_runs", "sel_countries"))
+  # Save disease burden estimates
+  saveRDS(dalys_dt, file = paste0(o$pth$burden, sim$id, ".rds"))
 }
 
