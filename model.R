@@ -154,9 +154,9 @@ run_model = function(sim, data) {
       country_year_mcv2 <- 0
     }
     
-    # if ( length (country_year_mcv2) == 0 || is.na(country_year_mcv2) ) {
-    #   country_year_mcv2 <- 0
-    # }
+    if (length(country_year_mcv2) == 0 || is.na(country_year_mcv2)) {
+      country_year_mcv2 <- 0
+    }
     
     # Interpretation of set_sia
     #  0: no SIA
