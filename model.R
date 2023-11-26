@@ -169,6 +169,7 @@ run_model = function(sim, data) {
     # set up SIA inputs
     cy_coverage_sia <- data$coverage_sia[year == y]
     if ((sim$set_sia >= 1) && (dim(cy_coverage_sia)[1] > 0)) {
+      
       # set up timesteps based on day of the year
       setorder(cy_coverage_sia, mid_day)
       sia_days <- cy_coverage_sia$mid_day

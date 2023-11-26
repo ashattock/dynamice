@@ -119,9 +119,10 @@ load_coverage = function(sim, type) {
   
   # Load coverage data and filter for years of interest
   coverage_data = fread(file_path) %>%
-    filter(country_code %in% sim$country, 
-           year %in% o$years) %>%
-    select(country = country_code, vaccine, year, coverage)
+    select(-country) %>%
+    rename(country = country_code) %>%
+    filter(country %in% sim$country, 
+           year %in% o$years)
   
   # Remove trivial values for SIA
   if (type == "sia") {
