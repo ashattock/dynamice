@@ -21,17 +21,17 @@ run_results = function() {
   if (o$do_vimc_files)
     vimc_output()
   
-  browser()
-  
   # Plot coverage
-  if (o$plot_coverage)
-    plot_coverage_all()
+  # if (o$plot_coverage)
+  #   plot_coverage_all()
   
   # Plot everything
-  #
-  # TODO: Seperate this out to individual plots
-  if (o$plot_everything)
-    plot_everything()
+  # if (o$plot_everything)
+  #   plot_everything()
+  
+  # Plot deaths and DALYs averted
+  if (o$plot_burden_averted)
+    plot_burden_averted()
 }
 
 # ---------------------------------------------------------
@@ -98,5 +98,43 @@ vimc_output = function() {
   # ---- Uncertainty simulations ----
   
   # TODO: I'm not sure how LSHTM handle uncertainty
+}
+
+# ---------------------------------------------------------
+# Easy load of all central results
+# ---------------------------------------------------------
+load_central_results = function() {
+  
+  # TODO: Throw helpful warning if vimc_output() has not yet been called
+  
+  # Function for loading a single file
+  load_fn = function(scenario) {
+    
+    # File name and path
+    load_name = paste1("central", scenario)
+    load_file = paste0(o$pth$results, load_name, ".csv")
+    
+    # Load results and append scenario details
+    result_dt = fread(load_file) %>%
+      mutate(scenario = scenario, 
+             .before = 1) %>%
+      select(-disease)
+   
+    return(result_dt) 
+  }
+  
+  # Call loading function for each scenario
+  central_dt = lapply(o$scenarios, load_fn) %>%
+    rbindlist() %>%
+    # Convert to tidy format...
+    pivot_longer(cols = o$metrics, 
+                 names_to = "metric") %>%
+    # Tidy up...
+    select(country, country_name, scenario, 
+           year, age, metric, value) %>%
+    arrange(metric, scenario, country, year, age) %>%
+    as.data.table()
+  
+  return(central_dt)
 }
 

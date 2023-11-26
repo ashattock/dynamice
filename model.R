@@ -315,8 +315,8 @@ run_burden = function(sim, data) {
     # Finally, calculate DALYs...
     mutate(dalys = yll + yld) %>%
     # Tidy up...
-    select(id, year, age, deaths, yll, dalys) %>%
-    pivot_longer(cols = c(deaths, yll, dalys),
+    select(id, year, age, all_of(o$metrics)) %>%
+    pivot_longer(cols = o$metrics,
                  names_to = "metric") %>%
     arrange(metric, year, age) %>%
     as.data.table()

@@ -49,6 +49,9 @@ set_options = function(do_step = NA, quiet = FALSE) {
   # TODO: Ask what this represents, assuming the product of disability
   #       weight and average duration of infection until recovery
   o$disability_weight = 0.002
+  
+  # Model metrics to report
+  o$metrics = qc(deaths, dalys, yll)
 
   # ---- Data settings ----
   
@@ -83,11 +86,12 @@ set_options = function(do_step = NA, quiet = FALSE) {
   # ---- Results and plotting flags ----
   
   # Produce main VIMC outputs
-  o$do_vimc_files = TRUE
+  o$do_vimc_files = FALSE
 
   # Turn figures on or off
-  o$plot_coverage   = TRUE
-  o$plot_everything = TRUE
+  o$plot_coverage       = FALSE
+  o$plot_everything     = FALSE
+  o$plot_burden_averted = TRUE
 
   # ---- Plotting settings ----
 

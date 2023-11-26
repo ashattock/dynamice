@@ -1,7 +1,106 @@
-# plot_results.R
-# update: 2023/06/19
+############################################################
+# PLOTTING
+#
+# All plotting functionality in one place.
+#
+############################################################
 
+# ---------------------------------------------------------
+# Plot deaths and DALYs averted over time
+# ---------------------------------------------------------
+plot_burden_averted = function() {
+  
+  message(" > Plotting disease burden averted")
+  
+  # Load central results for all scenarios
+  results_dt = load_central_results()
+  
+  # ---- Disease burden over time ----
+  
+  # Summarise over all ages
+  burden_dt = results_dt %>%
+    group_by(country_name, scenario, year, metric) %>%
+    summarise(value = sum(value)) %>%
+    ungroup() %>%
+    arrange(metric, scenario, country_name, year) %>%
+    as.data.table()
+  
+  # Iterate through key metrics
+  for (metric in o$metrics) {
+    
+    # Subset for this metric
+    metric_dt = burden_dt %>%
+      filter(metric == !!metric)
+    
+    # Basic plot of disease burden over time
+    g = ggplot(metric_dt) +
+      aes(x = year, y = value, colour = scenario) +
+      geom_line() +
+      facet_wrap(~country_name, scales = "free_y")
+    
+    # Save figure to file
+    save_fig(g, "Disease burden", metric)
+  }
+  
+  # ---- Cumulative disease burden averted over time ----
+  
+  # Metrics averted relative to baseline
+  averted_dt = burden_dt %>%
+    # First cumulatively sum over time...
+    group_by(country_name, scenario, metric) %>%
+    mutate(value = cumsum(value)) %>%
+    ungroup() %>%
+    # Take the difference to baseline...
+    group_by(country_name, year, metric) %>%
+    mutate(averted = value[scenario == "nomcv"] - value) %>%
+    ungroup() %>%
+    # Remove baseline scenario...
+    filter(scenario != "nomcv") %>%
+    as.data.table()
+  
+  # Iterate through key metrics
+  for (metric in o$metrics) {
+    
+    # Subset for this metric
+    metric_dt = averted_dt %>%
+      filter(metric == !!metric)
+    
+    # Disease burden averted over time
+    g = ggplot(metric_dt) +
+      aes(x = year, y = value, colour = scenario) +
+      geom_line() +
+      facet_wrap(~country_name, scales = "free_y")
+    
+    # Save figure to file
+    save_fig(g, "Disease burden averted", metric)
+  }
+  
+  # ---- Total disease burden averted ----
+  
+  # Total impact over all countries
+  total_dt = averted_dt %>%
+    group_by(scenario, year, metric) %>%
+    summarise(value = sum(value)) %>%
+    ungroup() %>%
+    arrange(metric, scenario, year) %>%
+    as.data.table()
+  
+  # Total disease burden over time for all metrics
+  g = ggplot(total_dt) +
+    aes(x = year, y = value, colour = scenario) +
+    geom_line() + 
+    facet_wrap(~metric, scales = "free_y")
+  
+  # Save figure to file
+  save_fig(g, "Disease burden averted total")
+}
+
+# ---------------------------------------------------------
+# xxx
+# ---------------------------------------------------------
 plot_coverage_all = function() {
+  
+  stop("Plotting functionality not yet integrated into this pipeline")
 
   # TODO: Use countrycode package here
   country_names <- c("India", "Nigeria", "Indonesia", "Ethiopia", "China",
@@ -92,7 +191,12 @@ plot_coverage_all = function() {
   dev.off()
 }
 
+# ---------------------------------------------------------
+# xxx
+# ---------------------------------------------------------
 plot_everything = function() {
+  
+  stop("Plotting functionality not yet integrated into this pipeline")
 
   vac_stgs <- c("nomcv",                 # (1) no vaccination
                 "mcv1",                  # (2) MCV1 only
@@ -863,5 +967,42 @@ plot_everything = function() {
                           ymin = lower/1e3, ymax = upper/1e3, colour = `Data type`)) +
     scale_colour_manual (name = " ", values = "#bdbdbd")
   dev.off()
+}
+
+# ---------------------------------------------------------
+# Save a ggplot figure to file with default settings
+# ---------------------------------------------------------
+save_fig = function(g, ..., dir = NULL) {
+  
+  # Collapse inputs into vector of strings
+  fig_name_parts = unlist(list(...))
+  
+  # Construct file name to concatenate with file path
+  save_name = paste(fig_name_parts, collapse = " - ")
+  
+  # Construct path to save file to
+  save_path = o$pth$figures
+  if (!is.null(dir)) {
+    ext_path  = paste(dir, collapse = file_sep())
+    save_path = paste0(save_path, ext_path, file_sep())
+  }
+  
+  # Create directory if it exists
+  if (!dir.exists(save_path))
+    dir.create(save_path)
+  
+  # Repeat the saving process for each image format in figure_format
+  for (fig_format in o$figure_format) {
+    full_path = paste0(save_path, save_name, ".", fig_format)
+    
+    # Save figure (size specified in options.R)
+    ggsave(full_path, 
+           plot   = g, 
+           device = fig_format, 
+           dpi    = o$save_resolution, 
+           width  = o$save_width, 
+           height = o$save_height, 
+           units  = o$save_units)
+  }
 }
 
