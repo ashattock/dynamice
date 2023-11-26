@@ -8,19 +8,16 @@
 # ------------------------------------------------------------------------------
 # Run measles model for a given country and scenario
 # ------------------------------------------------------------------------------
-model = function(sim) {
-  
-  # Model input data
-  d = prepare_data(sim)
+run_model = function(sim, data) {
   
   # Global model parameters
-  p = prepare_params(d)
+  p = prepare_params(data)
   
   # ---- Model set up ----
   
   # country-specific timeliness curve
-  country_timeliness <- d$timeliness[!is.na(age), timeliness]
-  timeliness_ages    <- d$timeliness[!is.na(age), age]
+  country_timeliness <- data$timeliness[!is.na(age), timeliness]
+  timeliness_ages    <- data$timeliness[!is.na(age), age]
   
   # expand 0-2 years old to weekly age strata
   s         <- 52 # number of finer stages within an age band (weekly ages, so 52)
@@ -28,27 +25,27 @@ model = function(sim) {
   beta_full <- matrix (0, ncol = 254, nrow = 254)
   
   beta_full[(1:(s*jt)), (1:(s*jt))] <- expandMatrix (
-    A = d$contact [1:jt, 1:jt]/s,  # needs to be divided by 52 so that the mean total number of contacts stays the same
+    A = data$contact [1:jt, 1:jt]/s,  # needs to be divided by 52 so that the mean total number of contacts stays the same
     expand_rows =  s, expand_cols =  s,
     rescale_rows = FALSE, rescale_cols = FALSE)
   
   beta_full[1:(s*jt),((s*jt)+1):(ncol(beta_full))] <- expandMatrix(
-    A = d$contact [1:jt,(jt+1):ncol(d$contact)],
+    A = data$contact [1:jt,(jt+1):ncol(data$contact)],
     expand_rows = s, expand_cols = 1,
     rescale_rows = F, rescale_cols = F)
   
   beta_full[((s*jt)+1):(nrow(beta_full)), 1:(s*jt)] <- expandMatrix(
-    A = d$contact [(jt+1):nrow(d$contact),1:jt]/s,  # adjust to ensure the mean total number of contacts stays the same
+    A = data$contact [(jt+1):nrow(data$contact),1:jt]/s,  # adjust to ensure the mean total number of contacts stays the same
     expand_rows = 1, expand_cols = s,
     rescale_rows = F, rescale_cols = F)
   
   beta_full[((s*jt)+1):(nrow(beta_full)), ((s*jt)+1):(ncol(beta_full))] <-
-    d$contact [(jt+1):nrow(d$contact),(jt+1):ncol(d$contact)]
+    data$contact [(jt+1):nrow(data$contact),(jt+1):ncol(data$contact)]
   
   beta_full_unadj <- beta_full
   
   # infection rate under target R0
-  beta_tstep  <- d$r0 * p$gamma
+  beta_tstep  <- data$r0 * p$gamma
   
   # setup inputs for DynaMICE Rcpp model
   n_years   <- length(o$years)
@@ -80,7 +77,7 @@ model = function(sim) {
     # ---- Spin up ----
     
     #old script groups those aged 70-80, but division is by actual population size
-    pop.vector <- d$population[year == y, value]
+    pop.vector <- data$population[year == y, value]
     
     # first expand polymod matrix (contact_tstep) and population vector and
     # then divide by population sizes, otherwise it doesn't work.
@@ -112,18 +109,23 @@ model = function(sim) {
     
     # ---- Coverage and timeliness ----
     
+    # Interpretatiion of set_routine
+    #  0: no routine MCV
+    #  1: MCV1 only
+    #  2: MCV1 + MCV2
+    
     if (sim$set_routine >= 1) {
       
       # Maximum coverage can (obviously) only be 100%
       # To estimate proportion that is vaccinated at each week, we first calculate the number of individuals remaining susceptible
       # Then we calculate the number of individuals that should be vaccinated each week, in order to remain 1 - coverage susceptibles at the end of the timeliness data
       # In essence, this becomes the inverse of the cumulative timeliness curve
-      cycov <- d$coverage_routine[year == y & vaccine == "MCV1", coverage]
+      cycov <- data$coverage_routine[year == y & vaccine == "MCV1", coverage]
       
       # Not use the following adjustment for coverage, as it leads to reduced the ...
       # final size of vaccinated population under the assumption of perfect timeliness
-      # cycov <- d$coverage_routine [year == y & vaccine == "MCV1", coverage] /
-      #   d$timeliness [is.na(age), prop_final_cov]
+      # cycov <- data$coverage_routine [year == y & vaccine == "MCV1", coverage] /
+      #   data$timeliness [is.na(age), prop_final_cov]
       
       if (length(cycov) == 0) {   # check if vaccine is not yet introduced and thereby, coverage value missing for this year
         cycov <- 0
@@ -147,7 +149,7 @@ model = function(sim) {
     }
     
     if (sim$set_routine == 2) {
-      country_year_mcv2 <- d$coverage_routine [year == y & vaccine == "MCV2", coverage]
+      country_year_mcv2 <- data$coverage_routine [year == y & vaccine == "MCV2", coverage]
     } else {
       country_year_mcv2 <- 0
     }
@@ -156,8 +158,16 @@ model = function(sim) {
     #   country_year_mcv2 <- 0
     # }
     
+    # Interpretatiion of set_sia
+    #  0: no SIA
+    #  1: random reach (baseline assumption)
+    #  2: 7.7% less likely to be reached at national level
+    #  3: zero-dose first
+    #  4: already-vaccinated first
+    #  5: 7.7% less likely to be reached at subnational level
+    
     # set up SIA inputs
-    cy_coverage_sia <- d$coverage_sia [year == y]
+    cy_coverage_sia <- data$coverage_sia[year == y]
     if ((sim$set_sia >= 1) && (dim(cy_coverage_sia)[1] > 0)) {
       # set up timesteps based on day of the year
       setorder(cy_coverage_sia, mid_day)
@@ -234,18 +244,137 @@ model = function(sim) {
     reachs0d = rbind(colSums(reach0_out[1:52,]), colSums(reach0_out[53:104,]), colSums(reach0_out[105:156,]), reach0_out[157:254,]),
     fvps     = rbind(colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,]))
   
-  # Save model output
-  saveRDS(output, file = paste0(o$pth$sims, sim$id, ".rds"))
+  # Format into datatable
+  output_dt = data.table(
+    id       = sim$id, 
+    year     = rep(o$years, each  = length(o$ages)),
+    age      = rep(o$ages,  times = length(o$years)),
+    cases0d  = as.vector(output$cases0d),
+    cases1d  = as.vector(output$cases1d),
+    cases2d  = as.vector(output$cases2d),
+    pops     = as.vector(output$pops),
+    pops0d   = as.vector(output$pops0d),
+    popsSus  = as.vector(output$popsSus),
+    doses    = as.vector(output$doses),
+    reachs0d = as.vector(output$reachs0d),
+    fvps     = as.vector(output$fvps))
+    
+    # Save model output
+  saveRDS(output_dt, file = paste0(o$pth$sims, sim$id, ".rds"))
 }
 
 # ------------------------------------------------------------------------------
-# Create burden estimate csv files
+# Estimate disease burden from model outcomes
 # ------------------------------------------------------------------------------
-get_burden_estimate = function(sim) {
+run_burden = function(sim, data) {
   
-  # TODO: Split this up a bit - do DALYs then save VIMC outputs
+  # Save model output
+  model_output = readRDS(paste0(o$pth$sims, sim$id, ".rds"))
   
   browser()
+  
+  # remaining life expectancy
+  lexp_remain <- tailor_data_lexp_remain(sim$country)
+  
+  
+  all_runs <- lexp_remain [all_runs,
+                           .(i.country, year, age, cases0d, cases1d, cases2d,
+                             pops, pops0d, popsSus,  doses, reachs0d, fvps,
+                             country_name, disease, value),
+                           on = .(country_code = country,
+                                  age          = age,
+                                  year         = year)]
+  
+  # rename column names for output
+  setnames (all_runs,
+            old = c("i.country", "value"      ),
+            new = c("country"  , "remain_lexp"))
+  
+  
+  # MCV1 coverage
+  coverage_routine_MCV1 <- coverage_routine [(vaccine == "MCV1") & (country_code %in% sel_countries)]
+  
+  all_runs <- coverage_routine_MCV1 [all_runs,
+                                     .(i.country, i.year, age,
+                                       cases0d, cases1d, cases2d,
+                                       pops, pops0d, popsSus,
+                                       doses, reachs0d, fvps, country_name,
+                                       disease, coverage, remain_lexp),
+                                     on = .(country_code = country,
+                                            year         = year) ]
+  
+  
+  # rename column "coverage" to "MCV1"
+  setnames (x = all_runs,
+            old = c("i.country", "i.year", "coverage"),
+            new = c("country"  , "year"  , "MCV1"    ))
+  
+  browser() # Use data$cfr here
+  
+  # ---- calculate deaths and DALYs ----
+  data_cfr_21 <- setDT (copy (data_cfr_portnoy_21))
+  
+  # The data contains CFR estimates between 1981 and 2020, for age between 0 to 99.
+  # Extrapolate CFRs for year 1980 and 2021-2100 and for age 100.
+  
+  min_year = min (all_runs [, year])
+  max_year = max (all_runs [, year])
+  data_cfr_21 <- data_cfr_21 [year %in% min_year:max_year & country %in% sel_countries]
+  
+  if (min_year < 1981) {
+    data_cfr_add <- rbindlist (lapply (min_year:1981, function(i) copy (data_cfr_21 [year == 1981, ])[, year := i]))
+    data_cfr_21  <- rbind     (data_cfr_add, data_cfr_21, use.names = TRUE)
+  }
+  
+  if (max_year > 2020) {
+    data_cfr_add <- rbindlist (lapply (2021:max_year, function(i) copy (data_cfr_21 [year == 2020, ])[, year := i]))
+    data_cfr_21  <- rbind     (data_cfr_21, data_cfr_add, use.names = TRUE)
+  }
+  
+  data_cfr_21  <- rbind (data_cfr_21,
+                         copy (data_cfr_21 [age == 99, ])[, age := 100],
+                         use.names = TRUE)
+  setorder (data_cfr_21, country, year, age)
+  
+  all_runs <- data_cfr_21 [all_runs,
+                           .(disease, year, age, country, country_name,
+                             pops, pops0d, popsSus, cases0d, cases1d, cases2d, doses,
+                             reachs0d, fvps, cfr, remain_lexp),
+                           on = .(country = country,
+                                  year    = year,
+                                  age     = age)]
+  
+  # estimate deaths
+  all_runs [, `:=` (deaths0d = cases0d * cfr,
+                    deaths1d = cases1d * cfr,
+                    deaths2d = cases2d * cfr)]
+  
+  # calculate DALYs = (YLDs) + (YLLs)
+  all_runs [, dalys := (((cases0d+cases1d+cases2d) - (deaths0d+deaths1d+deaths2d)) * 0.002) +
+              ((deaths0d+deaths1d+deaths2d) * remain_lexp)]
+  
+  # adjust columns for output
+  select.cols <- c("disease", "country", "country_name", "year", "age",
+                   "pops", "pops0d", "popsSus",
+                   "cases0d", "cases1d", "cases2d", "deaths0d", "deaths1d", "deaths2d",
+                   "dalys", "doses", "reachs0d", "fvps")
+  all_runs <- subset (all_runs, select = select.cols)
+  
+  # save burden estimates to file
+  fwrite(x    = all_runs[order(country, year, age)],
+         file = paste0(o$pth$central, burden_estimate_file, ".csv"))
+  
+  
+  # release memory for the next round
+  remove (list = c("all_runs", "sel_countries"))
+}
+
+# ------------------------------------------------------------------------------
+# Create VIMC results files
+# ------------------------------------------------------------------------------
+create_vimc_output = function() {
+  
+  browser() # Only some of this is relevant...
   
   # ---- Merge and process results ----
   

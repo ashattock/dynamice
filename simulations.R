@@ -150,30 +150,20 @@ run_sim = function(job_id) {
               by = "scenario") %>%
     select(-scenario_name)
   
-  # Interpretatiion of set_routine
-  #  0: no routine MCV
-  #  1: MCV1 only
-  #  2: MCV1 + MCV2
+  message(" > Running ", sim$id)
   
-  # Interpretatiion of set_sia
-  #  0: no SIA
-  #  1: random reach (baseline assumption)
-  #  2: 7.7% less likely to be reached at national level
-  #  3: zero-dose first
-  #  4: already-vaccinated first
-  #  5: 7.7% less likely to be reached at subnational level
+  # ---- Load data for this simulation ----
   
-  message(" > Simulating: ", sim$id)
+  # Prepare model input data
+  data = prepare_data(sim)  # See prepare.R
   
   # ---- Simulate model ----
   
   # Run DynaMICE model
-  model(sim)  # See model.R
+  run_model(sim, data)  # See model.R
   
-  browser()
-  
-  # merge outputs into csv files
-  get_burden_estimate(sim)
+  # Estimate disease burden from model outcomes
+  run_burden(sim, data)  # See model.R
   
   browser()
 }

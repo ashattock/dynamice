@@ -54,7 +54,7 @@ prepare_data = function(sim) {
   # ---- Coverage data ----
   
   # Coverage data for this scenario and country
-  d = list(
+  data = list(
     coverage_routine = load_coverage(sim, "routine"), 
     coverage_sia     = load_coverage(sim, "sia"))
   
@@ -70,41 +70,41 @@ prepare_data = function(sim) {
     ref = str_remove_all(file, "(^data_|.rds$)")
     
     # Load data file
-    data = readRDS(paste0(o$pth$input, file))
+    this_data = readRDS(paste0(o$pth$input, file))
     
     # Filter datatable for this country
-    if (is.data.frame(data))
-      d[[ref]] = data[country == sim$country]
+    if (is.data.frame(this_data))
+      data[[ref]] = this_data[country == sim$country]
     
     # ... or select list element for this country
-    if (!is.data.frame(data))
-      d[[ref]] = data[[sim$country]]
+    if (!is.data.frame(this_data))
+      data[[ref]] = this_data[[sim$country]]
   }
   
   # ---- Set basic reproduction number ----
   
   # If provided, use scenario-specific R0
   if (!is.na(sim$r0))
-    d$r0 = sim$r0
+    data$r0 = sim$r0
   
   # If not provided but fixed, use user-defined R0
   if (is.na(sim$r0) && !is.na(o$fix_r0))
-    d$r0 = o$fix_r0
+    data$r0 = o$fix_r0
   
   # If not provided nor fixed, use country-specific R0
   if (is.na(sim$r0) && is.na(o$fix_r0))
-    d$r0 = d$rnought$r0
+    data$r0 = data$rnought$r0
   
   # Remove now-redundant data
-  d$rnought = NULL
+  data$rnought = NULL
   
   # ---- Other data considerations ----
 
   # Update timeliness if MCV1 not given at 39 weeks (9 months)
-  if (d$vax_age$mcv1 != 39)
-    d$timeliness[!is.na(age), timeliness := ifelse(age < d$vax_age$mcv1, 0, 1)]
+  if (data$vax_age$mcv1 != 39)
+    data$timeliness[!is.na(age), timeliness := ifelse(age < data$vax_age$mcv1, 0, 1)]
   
-  return(d)
+  return(data)
 }
 
 # ---------------------------------------------------------

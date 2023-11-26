@@ -35,6 +35,9 @@ set_options = function(do_step = NA, quiet = FALSE) {
   # Years to analyse
   o$years = 1980 : 2024
   
+  # Age range 
+  o$ages = 0 : 100
+  
   # Assume a fixed R0 for the central run
   o$fix_r0 = 15.9  # Set to NA to turn off
   
