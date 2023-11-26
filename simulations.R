@@ -30,21 +30,12 @@ run_simulations = function() {
   # Skip if nothing to run
   if (n_jobs > 0) {
     
-    # Submit all jobs to the cluster (see myRfunctions.R)
+    # Submit all jobs to the cluster (see auxiliary.R)
     submit_cluster_jobs(n_jobs, "submit.sh", "run_sim")
     
-    # Throw an error if any cluster jobs failed (see myRfunctions.R)
+    # Throw an error if any cluster jobs failed (see auxiliary.R)
     stop_if_errors(o$pth$log, o$err_file, err_tol = 1)
-    
-    # Remove all log files if desired
-    if (o$rm_cluster_log) 
-      unlink(paste0(o$pth$log, "*"), force = TRUE)
   }
-  
-  # ---- Concatenate output ----
-  
-  # Aggregate results for each branch and indicator
-  # run_aggregate(sims, timeframe)  # See aggregate.R
 }
 
 # ---------------------------------------------------------
