@@ -10,9 +10,9 @@
 # ---------------------------------------------------------
 # Set model options and assumptions
 # ---------------------------------------------------------
-set_options = function(do_step = NA) {
+set_options = function(do_step = NA, quiet = FALSE) {
 
-  message("* Setting options")
+  if (!quiet) message("* Setting options")
 
   # Several global R settings to make life easier
   default_R_options()  # See auxiliary.R
@@ -37,11 +37,39 @@ set_options = function(do_step = NA) {
   
   # Assume a fixed R0 for the central run
   o$fix_r0 = 15.9  # Set to NA to turn off
+  
+  # Vary R0 for uncertainty simulations
+  o$vary_r0 = seq(6, 26, 2)
 
   # ---- Data settings ----
   
   # Force re-construct coverage data
   o$reload_coverage = FALSE
+  
+  # ---- Cluster settings ----
+  
+  # Detect user - required for checking cluster jobs
+  o$user = Sys.info()[["user"]]
+  
+  # Flag for overwriting any existing simulations
+  o$overwrite = FALSE
+  
+  # Time allocated for each cluster job
+  o$job_time  = "00:15:00"  # Use "HH:MM:SS" or "D-HH:MM:SS" format
+  o$job_queue = "30min"  # Queue to use (check out scicore wiki if unfamiliar)
+  
+  # Memory to allocate for each cluster job
+  o$job_memory = "1GB"
+  
+  # Set an upper limit for jobs that can be run at any one time
+  o$job_limit = 2000
+  
+  # Define names for cluster log and error files
+  o$log_file = "scicore_log.txt"
+  o$err_file = "scicore_error.txt"
+  
+  # Action to take if user is already running cluster jobs
+  o$cluster_conflict_action = "error"  # Set to 'none' to turn off
   
   # ---- Plotting flags ----
 

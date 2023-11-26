@@ -28,7 +28,7 @@ as_named_dt = function(x, new_names) {
 # ---------------------------------------------------------
 # Check if user is currently running any cluster jobs
 # ---------------------------------------------------------
-check_cluster_jobs = function(o, action = "error") {
+check_cluster_jobs = function(action = "error") {
   
   # Check number of running and pending jobs
   n_jobs = n_slurm_jobs(user = o$user)
@@ -512,13 +512,13 @@ str2vec = function(x, v) {
 # ---------------------------------------------------------
 # Submit jobs to the cluster and wait until they are complete
 # ---------------------------------------------------------
-submit_cluster_jobs = function(o, n_jobs, bash_file, ...) {
+submit_cluster_jobs = function(n_jobs, bash_file, ...) {
   
   # Skip if no jobs to run
   if (n_jobs > 0) {
     
     # Check if user is currently running any cluster jobs (see myRfunctions.R)
-    check_cluster_jobs(o, action = o$cluster_conflict_action)
+    check_cluster_jobs(action = o$cluster_conflict_action)
     
     # Create a new log file for the cluster jobs (see myRfunctions.R)
     log_file = create_bash_log(o$pth$log, log = o$log_file, err = o$err_file)
@@ -529,13 +529,9 @@ submit_cluster_jobs = function(o, n_jobs, bash_file, ...) {
     # TODO: Perform some checks on these user defined options...
     
     # Format user-defined options into sbatch-interpretable options
-    sbatch_options = c(paste0("--partition=", o$cluster_partition), 
-                       paste0("--mem=",       o$job_memory), 
-                       paste0("--qos=",       o$job_queue))
-    
-    # If using scicore partition, include run time option (unlimited on covid19 partition)
-    if (o$cluster_partition == "scicore")
-      sbatch_options = c(sbatch_options, paste0("--time=", o$job_time))
+    sbatch_options = c(paste0("--mem=",  o$job_memory), 
+                       paste0("--qos=",  o$job_queue), 
+                       paste0("--time=", o$job_time))
     
     # Collapse into a whitespace-seperated string
     sbatch_options = paste0(sbatch_options, collapse = " ")
@@ -550,7 +546,7 @@ submit_cluster_jobs = function(o, n_jobs, bash_file, ...) {
     system(sys_command)
     
     # Wait for all cluster jobs to complete (see myRfunctions.R)
-    wait_for_jobs(o, log_file, n_jobs)
+    wait_for_jobs(log_file, n_jobs)
   }
 }
 
@@ -633,8 +629,7 @@ unlist_format = function(x, sep = "$", ...) {
 # ---------------------------------------------------------
 # Wait until all cluster jobs have finished
 # ---------------------------------------------------------
-wait_for_jobs = function(o, log_file, n_lines, 
-                         wait_time = 1, pause_time = 5) {
+wait_for_jobs = function(log_file, n_lines, wait_time = 1, pause_time = 5) {
   
   # Wait for log file to be created
   while (!file.exists(log_file)) Sys.sleep(wait_time)

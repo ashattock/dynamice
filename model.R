@@ -29,17 +29,7 @@ runScenario_rcpp <- function (
 # ------------------------------------------------------------------------------
 model = function(iso3, scenario_name, routine, using_sia) {
   
-  # NOTES ON INPUTS: 
-  #
-  # routine := A numeric indicator that determines vaccination programmes
-  # for children: 0 - No vaccination, 1 - Only MCV1,  2 - MCV1 and MCV2.
-  #
-  # using_sia := A numeric indicator that determines whether supplementary
-  # immunisation activities (SIAs) are implemented and how SIAs are distributed
-  # between zero-dose and already-vaccinated populations: 0 - no SIA, 1 - SIAs
-  # based on a weighted logistic function fitted with Portnoy's data, and 2 -
-  # SIAs based on an assumption that 7.7% of the population are never reached by
-  # vaccination.
+  browser()
   
   # ---- Load data and parameters ----
   

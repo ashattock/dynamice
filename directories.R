@@ -19,30 +19,31 @@ prepare_dirs = function(o) {
   #
   # NOTE: We should already be in this code directory
   pth = list(code = getwd())
-
+  
+  # Functino for setting path relative to cwd
+  set_pth = function(...)
+    dir = file.path(pth$code, ...)
+  
   # ---- Input and configuration directories ----
 
-  # Parent path of all input files
-  pth$config   = file.path(pth$code, "config")
-  pth$input    = file.path(pth$code, "input")
-  pth$coverage = file.path(pth$input, "coverage") # Subdir of input
+  # Directories for all input files
+  pth$config   = set_pth("config")
+  pth$input    = set_pth("input")
+  pth$coverage = set_pth("input", "coverage")
 
   # ---- Output directories ----
 
-  # Parent path of all output files
-  pth_output = file.path(pth$code, "output")
-
-  # Path to cached data tables
-  # pth$tables = file.path(pth_output, "0_tables")
+  # Path to model output, results, and figures
+  pth$sims    = set_pth("output", "1_simulations")
+  pth$central = set_pth("output", "2_central")
+  pth$uncert  = set_pth("output", "3_uncertainty")
+  pth$figures = set_pth("output", "4_figures")
   
-  # Path to results and figures
-  pth$sims    = file.path(pth_output, "1_central")
-  pth$central = file.path(pth_output, "2_central")
-  pth$uncert  = file.path(pth_output, "3_uncertainty")
-  pth$figures = file.path(pth_output, "4_figures")
+  # Directory for cluster logs
+  pth$log = set_pth("log")
 
   # Append paths to o list
-  o = set_dirs(o, pth)
+  o = make_dirs(o, pth)
 
   return(o)
 }
@@ -50,7 +51,7 @@ prepare_dirs = function(o) {
 # ---------------------------------------------------------
 # Make all output directories and append to o list
 # ---------------------------------------------------------
-set_dirs = function(o, pth) {
+make_dirs = function(o, pth) {
 
   # Iterate through dirs
   for (pth_name in names(pth)) {

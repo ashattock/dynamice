@@ -71,7 +71,7 @@ pacman::p_load(char = packages)
 # ---- Source files ----
 
 # Scripts that should bot be sourced
-no_src = c("launch.R", "dependencies.R")
+no_src = c("launch.R", "dependencies.R", "submit.R")
 
 # All R files, and those to source
 all_files = list.files(pattern = ".+\\.R$")

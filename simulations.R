@@ -22,7 +22,7 @@ run_simulations = function() {
   # Generate full set of simulations to run
   sims = get_simulations()
   
-  # ---- Run simulations ----
+  # ---- Submit simulations to cluster ----
   
   # Number of jobs to be run
   n_jobs = nrow(sims) # sum(sims$run)
@@ -32,14 +32,15 @@ run_simulations = function() {
   # Skip if nothing to run
   if (n_jobs > 0) {
     
-    # Specify wrapper function for running this set of simulations
-    sim_fn = paste0("run_sim_", timeframe)
-    
     # Submit all jobs to the cluster (see myRfunctions.R)
-    submit_cluster_jobs(n_jobs, "bash_submit.sh", sim_fn)
+    submit_cluster_jobs(n_jobs, "submit.sh", "run_sim")
     
     # Throw an error if any cluster jobs failed (see myRfunctions.R)
     stop_if_errors(o$pth$log, o$err_file, err_tol = 1)
+    
+    # Remove all log files if desired
+    if (o$rm_cluster_log) 
+      unlink(paste0(o$pth$log, "*"), force = TRUE)
   }
   
   browser()
@@ -79,7 +80,7 @@ get_simulations = function() {
               by = "scenario") %>%
     select(-scenario_name) %>%
     # Append scenario ID...
-    mutate(id = get_simulation_id(.)) %>%
+    mutate(id = paste1(country, set_routine, set_sia, scenario)) %>%
     arrange(scenario, country) %>%
     as.data.table()
   
@@ -100,9 +101,9 @@ get_simulations = function() {
   #   cbind(run = run_sim) %>%
   #   mutate(job_num = cumsum(run * 1), 
   #          job_num = ifelse(run, job_num, NA))
-  # 
-  # # Save scenario dataframe to file
-  # saveRDS(sims, file = paste0(o$pth$sim_input, "simulations_", timeframe, ".rds"))
+  
+  # Save scenario dataframe to file
+  saveRDS(sims, file = paste0(o$pth$sims, "all_simulations.rds"))
   
   # ---- Display number of sims ----
   
@@ -121,81 +122,19 @@ get_simulations = function() {
 }
   
 # ---------------------------------------------------------
-# Create simulation ID convention 
-# ---------------------------------------------------------
-get_simulation_id = function(sim) {
-  
-  # Combine details to create unique simulation ID
-  ids = paste1(
-    sim$country, 
-    sim$set_routine, 
-    sim$set_sia, 
-    sim$scenario)
-  
-  return(ids)
-}
-  
-  
-# ---------------------------------------------------------
 # All steps to actually simulate the model
 # ---------------------------------------------------------
 run_sim = function(job_id) {  
   
-  browser()
+  # Load all scenarios and select the one assocaited with job_id
+  sims = readRDS(paste0(o$pth$sims, "all_simulations.rds"))
+  sim  = sims[job_id, ] # sims[job_num == job_id, ]
+  
+  message(" > Simulating: ", sim$id)
   
   # ---- Run model for SIA activities ----
   
-  # run model by different SIA methods
-  for (isia in c(1,2,5)){
-    
-    if (isia == 2){
-      sel_scns <- 1:length(scenarios) # main assumption
-      set_sia  <- c (0, 0, 0, 2, 2, 0, 2, 3, 4, 3, 4, 3, 0)
-    } else {
-      sel_scns <- c(2,3,4,5,7) # evaluate different SIA assumptions
-      set_sia [c(4,5,7,14)] <- isia
-    }
-    
-    for (index in sel_scns){
-      
-      scenario_name  <- scenarios [index]
-      message(" - ", scenario_name)
-      
-      scenario_number <- sprintf("scenario%02d", index)
-      
-      # run model and estimate cases
-      burden_estimate_file <- runScenario_rcpp (
-        scenario_name          = scenario_name,
-        routine            = set_routine[index],
-        using_sia              = set_sia[index])
-      
-      browser()
-      
-      # separately estimate dalys
-      burden_estimate_file <- paste0 ("central_burden_estimate_",
-                                      scenario_name, ".csv")
-      
-      # merge outputs into csv files
-      get_burden_estimate(
-        # vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
-        scenario_name              = scenarios [index],
-        save_scenario              = scenario_number,
-        routine                = set_routine [index],
-        using_sia                  = set_sia         [index],
-        folder_date                = "20230401")
-    }
-    
-    browser()
-    
-    # move files to a specified folder
-    res_files <- list.files(o$pth$central)
-    dir.create (paste0 ("previous_res/20230401/siareach_", isia, "/"))
-    file.rename (from = paste0 (o$pth$central, res_files),
-                 to = paste0 ("previous_res/20230401/siareach_", isia, "/", res_files))
-  }
-  
-  # analyse burden estimates under different R0
-  set_sia <- c (0, 0, 0, 2, 2, 0, 2, 3, 4, 3, 4, 3, 0) # set back to the oringinal assumptions
+  browser()
   
   for (ir0 in c(seq(6,26,2))) {
     # vary R0 values
