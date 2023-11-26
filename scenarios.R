@@ -66,7 +66,7 @@ run_scenarios = function() {
     for (index in sel_scns){
       
       scenario_name  <- vac_strategies [index]
-      message("  > ", scenario_name)
+      message(" - ", scenario_name)
       
       scenario_number <- sprintf("scenario%02d", index)
       

@@ -41,11 +41,15 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
   # SIAs based on an assumption that 7.7% of the population are never reached by
   # vaccination.
   
+  # ---- Load data and parameters ----
+  
   # Model input data
   d = prepare_data(iso3, scenario_name)
   
   # Global model parameters
   p = prepare_params(d)
+  
+  # ---- Model set up ----
   
   # country-specific timeliness curve
   country_timeliness <- d$timeliness[!is.na(age), timeliness]
@@ -83,7 +87,6 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
   n_years   <- length(o$years)
   
   y_out       <- array(0, c(254, 14, n_years))   # numbers of age groups, compartments, years
-  #case_out    <- array(0, c(254, n_years))
   case0d_out  <- array(0, c(254, n_years))
   case1d_out  <- array(0, c(254, n_years))
   case2d_out  <- array(0, c(254, n_years))
@@ -100,14 +103,16 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
   
   t_spinup <- 1:1e5 # assume a fixed period for equilibrium period
   
-  message(" > ", iso3, ": running model")
+  # ---- Main model loop ----
+  
+  message("  > ", iso3, ": running model")
   
   # run model by yearly input
   for (y in o$years) {
     
-    message("  ~ ", y)
+    message("   ~ ", y)
     
-    browser()
+    # ---- Spin up ----
     
     #old script groups those aged 70-80, but division is by actual population size
     pop.vector <- d$population[year == y, value]
@@ -136,12 +141,11 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     # make sure the contact matrix to represent target R0
     beta_full <- (beta_tstep / Re(eigen(beta_full_R0, only.values=T)$values[1])) * beta_full
     
-    
     # run spin-up period
-    if (y == o$years[1]){
-      out_Comp <- rcpp_spinup (init_Comp, p, beta_full, pop.vector_full, length(t_spinup))
-      # print ('Spin-up period finished')
-    }
+    if (y == o$years[1])
+      out_Comp <- rcpp_spinup(init_Comp, p, beta_full, pop.vector_full, length(t_spinup))
+    
+    # ---- Coverage and timeliness ----
     
     if (vaccination >= 1) {
       
@@ -149,7 +153,7 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
       # To estimate proportion that is vaccinated at each week, we first calculate the number of individuals remaining susceptible
       # Then we calculate the number of individuals that should be vaccinated each week, in order to remain 1 - coverage susceptibles at the end of the timeliness data
       # In essence, this becomes the inverse of the cumulative timeliness curve
-      cycov <- d$coverage_routine [year == y & vaccine == "MCV1", coverage]
+      cycov <- d$coverage_routine[year == y & vaccine == "MCV1", coverage]
       
       # Not use the following adjustment for coverage, as it leads to reduced the ...
       # final size of vaccinated population under the assumption of perfect timeliness
@@ -187,7 +191,6 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     #   country_year_mcv2 <- 0
     # }
     
-    
     # set up SIA inputs
     cy_coverage_sia <- d$coverage_sia [year == y]
     if ((using_sia >= 1) && (dim(cy_coverage_sia)[1] > 0)) {
@@ -221,19 +224,26 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
       )
     }
     
+    # ---- Simulate model ----
+    
     t_start <- length(t_spinup) + (y-o$years[1])*p$tstep + 1
-    outp <- rcpp_vaccine_oney (out_Comp,
-                               p,
-                               sia_input,
-                               beta_full,
-                               pop.vector_full,
-                               country_year_timeliness_mcv1_allages,
-                               country_year_mcv2,
-                               t_start)
+    
+    outp <- rcpp_vaccine_oney(
+      out_Comp,
+      p,
+      sia_input,
+      beta_full,
+      pop.vector_full,
+      country_year_timeliness_mcv1_allages,
+      country_year_mcv2,
+      t_start)
+    
+    # ---- Store timestep output ----
+    
     out_Comp <- outp$out_Comp
     
+    # Store model output from this timestep
     y_out    [, , (y-o$years[1])+1] <- out_Comp
-    #case_out   [, (y-years[1])+1] <- outp$cases*pop.vector_full
     case0d_out [, (y-o$years[1])+1] <- outp$cases_0d*pop.vector_full     # new cases among 0-dose
     case1d_out [, (y-o$years[1])+1] <- outp$cases_1d*pop.vector_full     # new cases among 1-dose
     case2d_out [, (y-o$years[1])+1] <- outp$cases_2d*pop.vector_full     # new cases among >=2-dose
@@ -243,67 +253,30 @@ model = function(iso3, scenario_name, vaccination, using_sia) {
     dose_out   [, (y-o$years[1])+1] <- outp$doses*pop.vector_full
     reach0_out [, (y-o$years[1])+1] <- outp$reach_d0*pop.vector_full
     fvp_out    [, (y-o$years[1])+1] <- outp$fvps*pop.vector_full
-    
-    # if(y %% 20 == 0) 
-    #   message('year ', y, ' finished')
   }
   
-  save_name = paste1(save_scenario, iso3, vaccination, using_sia)
-  save_file = paste0(pth$output, save_name, ".rds")
+  # Summarise complete model output
+  output = list(
+    cases0d  = rbind(colSums(case0d_out[1:52,]), colSums(case0d_out[53:104,]), colSums(case0d_out[105:156,]), case0d_out[157:254,]),
+    cases1d  = rbind(colSums(case1d_out[1:52,]), colSums(case1d_out[53:104,]), colSums(case1d_out[105:156,]), case1d_out[157:254,]),
+    cases2d  = rbind(colSums(case2d_out[1:52,]), colSums(case2d_out[53:104,]), colSums(case2d_out[105:156,]), case2d_out[157:254,]),
+    pops     = rbind(colSums(   pop_out[1:52,]), colSums(   pop_out[53:104,]), colSums(   pop_out[105:156,]),    pop_out[157:254,]),
+    pops0d   = rbind(colSums( pop0d_out[1:52,]), colSums( pop0d_out[53:104,]), colSums( pop0d_out[105:156,]),  pop0d_out[157:254,]),
+    popsSus  = rbind(colSums(popSus_out[1:52,]), colSums(popSus_out[53:104,]), colSums(popSus_out[105:156,]), popSus_out[157:254,]),
+    doses    = rbind(colSums(  dose_out[1:52,]), colSums(  dose_out[53:104,]), colSums(  dose_out[105:156,]),   dose_out[157:254,]),
+    reachs0d = rbind(colSums(reach0_out[1:52,]), colSums(reach0_out[53:104,]), colSums(reach0_out[105:156,]), reach0_out[157:254,]),
+    fvps     = rbind(colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,]))
   
-  saveRDS (list(#cases   = rbind (colSums(  case_out[1:52,]), colSums(  case_out[53:104,]), colSums(  case_out[105:156,]),
-    cases0d  = rbind (colSums(case0d_out[1:52,]), colSums(case0d_out[53:104,]), colSums(case0d_out[105:156,]), case0d_out[157:254,]),
-    cases1d  = rbind (colSums(case1d_out[1:52,]), colSums(case1d_out[53:104,]), colSums(case1d_out[105:156,]), case1d_out[157:254,]),
-    cases2d  = rbind (colSums(case2d_out[1:52,]), colSums(case2d_out[53:104,]), colSums(case2d_out[105:156,]), case2d_out[157:254,]),
-    pops     = rbind (colSums(   pop_out[1:52,]), colSums(   pop_out[53:104,]), colSums(   pop_out[105:156,]),    pop_out[157:254,]),
-    pops0d   = rbind (colSums( pop0d_out[1:52,]), colSums( pop0d_out[53:104,]), colSums( pop0d_out[105:156,]),  pop0d_out[157:254,]),
-    popsSus  = rbind (colSums(popSus_out[1:52,]), colSums(popSus_out[53:104,]), colSums(popSus_out[105:156,]), popSus_out[157:254,]),
-    doses    = rbind (colSums(  dose_out[1:52,]), colSums(  dose_out[53:104,]), colSums(  dose_out[105:156,]),   dose_out[157:254,]),
-    reachs0d = rbind (colSums(reach0_out[1:52,]), colSums(reach0_out[53:104,]), colSums(reach0_out[105:156,]), reach0_out[157:254,]),
-    fvps     = rbind (colSums(   fvp_out[1:52,]), colSums(   fvp_out[53:104,]), colSums(   fvp_out[105:156,]),    fvp_out[157:254,])),
-    file = save_file)
+  save_name = paste1(iso3, scenario_name, vaccination, using_sia)
+  save_file = paste0(o$pth$output, save_name, ".rds")
   
-  message("  > ", iso3, ": finished model run & saved outputs")
+  # Save model output
+  saveRDS(output, file = save_file)
 }
 
 # ------------------------------------------------------------------------------
-#' Get burden estimate csv files
-#'
-#' A function that combines all the RDS files for a selected scenario into csv
-#' files. Each RDS file contains case estimates of a single country from a
-#' single run using the function \code{runScenario_rcpp()}. If stochastic runs
-#' are included (\code{psa > 0}), an additional csv is generated for the mean
-#' estimates of each country.
+# Create burden estimate csv files
 # ------------------------------------------------------------------------------
-#' @param scenario_name Name of the vaccination scenario selected or being
-#' analysed.
-#' @param save_scenario A folder name for saving results from a selected
-#' scenario, denoted by a two-digit number. e.g. "scenario08".
-#' @param log_name A file name for keeping a log.
-#' @param vaccination A numeric indicator that determines vaccination programmes
-#'  for children: 0 - No vaccination, 1 - Only MCV1, and 2 - MCV1 and MCV2.
-#' @param using_sia A numeric indicator that determines whether supplementary
-#' immunisation activities (SIAs) are implemented and how SIAs are distributed
-#' between zero-dose and already-vaccinated populations: 0 - no SIA, 1 - SIAs
-#' based on a weighted logistic function fitted with Portnoy's data, and 2 -
-#' SIAs based on an assumption that 7.7% of the population are never reached by
-#' vaccination.
-#' @param folder_date Starting date of the simulation, as seen in the folder
-#' name for RDS results, in the format "YYYYMMDD".
-#'
-#' @import data.table
-#'
-#' @examples
-#' \dontrun{
-#' get_burden_estimate (
-#'   scenario_name              = "campaign-only-default",
-#'   save_scenario               = scenario_number,
-#'   log_name                   = "test_log",
-#'   vaccination                = 0,
-#'   using_sia                  = 1,
-#'   folder_date                = "20210930"
-#'   )
-#'   }
 get_burden_estimate <- function (
     scenario_name,
     save_scenario,
@@ -316,9 +289,8 @@ get_burden_estimate <- function (
   
   browser()
   
-  # ----------------------------------------------------------------------------
-  # merge and process results
-  # ----------------------------------------------------------------------------
+  # ---- Merge and process results ----
+  
   # define folder name
   foldername <- paste0 (
     folder_date,
@@ -383,9 +355,8 @@ get_burden_estimate <- function (
   # select output years
   all_runs <- subset (all_runs, year %in% report_years)
   
-  # --------------------------------------------------------------------------
-  # add columns for remaining life expectancy & MCV1
-  # --------------------------------------------------------------------------
+  # ---- add columns for remaining life expectancy & MCV1 ----
+  
   sel_countries <- unique (all_runs$country)
   
   # remaining life expectancy
@@ -426,9 +397,7 @@ get_burden_estimate <- function (
   
   browser() # Use data$cfr here
   
-  # --------------------------------------------------------------------------
-  # calculate deaths and DALYs
-  # --------------------------------------------------------------------------
+  # ---- calculate deaths and DALYs ----
   data_cfr_21 <- setDT (copy (data_cfr_portnoy_21))
   
   # The data contains CFR estimates between 1981 and 2020, for age between 0 to 99.
@@ -485,7 +454,5 @@ get_burden_estimate <- function (
   # release memory for the next round
   remove (list = c("all_runs", "sel_countries"))
   
-  writelog (log_name, "burden estimate csv file generated")
-  
-  return ()
+  message("burden estimate csv file generated")
 }
