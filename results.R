@@ -64,7 +64,7 @@ vimc_output = function() {
     # ---- Load all results for this scenario
     
     # We'll load results for all countrues for this scenario
-    load_names = paste1(o$countries, scenario)
+    load_names = paste1(o$countries_all, scenario)
     load_files = paste0(o$pth$compiled, load_names, ".rds")
     
     # Load these results

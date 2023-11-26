@@ -15,7 +15,7 @@ source("dependencies.R")
 message("Running DynaMICE for EPI50 analysis")
 
 # Set options (see options.R)
-o = set_options(do_step = 2)
+o = set_options(do_step = 1)
 
 # Step 1) Run all simulations
 run_simulations()  # See simulations.R

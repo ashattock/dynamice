@@ -48,16 +48,6 @@ run_simulations = function() {
 # ---------------------------------------------------------
 get_simulations = function() {
   
-  # ---- Sanity check on scenario selection ----
-  
-  # Load all scenarios from config file
-  scenarios = fread(paste0(o$pth$config, "scenarios.csv"))
-  
-  # Throw an error if any unrecognised scenarios
-  unknown = setdiff(o$scenarios, scenarios$scenario)
-  if (length(unknown) > 0)
-    stop("Unrecognised scenarios defined: ", paste(unknown, collapse = ", "))
-  
   # ---- Full set of simulations ----
   
   # Grid of countries and scenarios to run
@@ -141,7 +131,7 @@ run_sim = function(job_id) {
     filter(job_num == job_id) %>%
     left_join(y  = scenarios_dt, 
               by = "scenario") %>%
-    select(-scenario_name)
+    select(-run, -job_num, -scenario_name)
   
   message(" > Running ", sim$id)
   
