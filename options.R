@@ -23,27 +23,26 @@ set_options = function(do_step = NA) {
   # Prepare output directory system
   o = prepare_dirs(o)  # See directories.R
 
-  # ---- Country scope ----
+  # ---- Simulation settings ----
 
-  # list countries for analysis
+  # Countries to simulate
   o$countries = qc(AGO, CHN, COD, ETH, IDN, IND, MDG,
                    MWI, NGA, PAK, PHL, SOM, UGA, UKR)
-
-  # ---- Time settings ----
-
+  
+  # Scenarios to simulate
+  o$scenarios = qc(nomcv, mcv1)
+  
   # Years to analyse
   o$years = 1980 : 2024
   
+  # Assume a fixed R0 for the central run
+  o$fix_r0 = 15.9  # Set to NA to turn off
+
   # ---- Data settings ----
   
   # Force re-construct coverage data
   o$reload_coverage = FALSE
   
-  # ---- Simulation settings ----
-  
-  # Assume a fixed R0 for the central run
-  o$fix_r0 = 15.9  # Set to NA to turn off
-
   # ---- Plotting flags ----
 
   # Turn figures on or off

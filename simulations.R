@@ -15,13 +15,17 @@ run_simulations = function() {
   
   message("* Running vaccine simulations")
   
+  # Prepare coverage input data
+  if (o$reload_coverage)
+    create_coverage()
+  
   # Generate full set of simulations to run
   sims = get_simulations()
   
   # ---- Run simulations ----
   
   # Number of jobs to be run
-  n_jobs = sum(sims$run)
+  n_jobs = nrow(sims) # sum(sims$run)
   
   browser()
   
@@ -51,96 +55,67 @@ run_simulations = function() {
 # ---------------------------------------------------------
 get_simulations = function() {
   
-  browser()
+  # Load all scenarios from config file
+  scenarios = fread(paste0(o$pth$config, "scenarios.csv"))
   
-  # Grid of countries, EIR, and seeds
+  # Interpretatiion of set_routine
+  #  0: no routine MCV
+  #  1: MCV1 only
+  #  2: MCV1 + MCV2
+  
+  # Interpretatiion of set_sia
+  #  0: no SIA
+  #  1: random reach (baseline assumption)
+  #  2: 7.7% less likely to be reached at national level
+  #  3: zero-dose first
+  #  4: already-vaccinated first
+  #  5: 7.7% less likely to be reached at subnational level
+  
+  # Grid of countries and scenarios to run
   sims = expand_grid(country  = o$countries, 
-                     eir      = o$sim$eir, 
-                     seed     = 1 : o$sim$n_seeds[[timeframe]], 
-                     scenario = run_scenarios) %>%
+                     scenario = o$scenarios) %>%
+    # Append scenario vaccination details...
+    left_join(y  = scenarios, 
+              by = "scenario") %>%
+    select(-scenario_name) %>%
     # Append scenario ID...
     mutate(id = get_simulation_id(.)) %>%
-    arrange(scenario, country, eir, seed) %>%
+    arrange(scenario, country) %>%
     as.data.table()
-  
-  browser()
-  
-  # prepare coverage inputs
-  vac_strategies <- c(
-    "nomcv",                 # (1) no vaccination
-    "mcv1",                  # (2) MCV1 only
-    "mcv1-mcv2",             # (3) MCV1 + MCV2
-    "mcv1-mcv2-sia",         # (4) MCV1 + MCV2 + SIA
-    "mcv1-sia",              # (5) MCV1 + SIA
-    "mcv1-mcv2alt1",         # (6) MCV1 + MCV2(early intro, fast rollout)
-    "mcv1-mcv2alt1-sia",     # (7) MCV1 + MCV2(early intro, fast rollout) + SIA
-    "mcv1-mcv2-siaalt1",     # (8) MCV1 + MCV2 + SIA(zero dose first)
-    "mcv1-mcv2-siaalt2",     # (9) MCV1 + MCV2 + SIA(already vaccinated first)
-    "mcv1-siaalt1",          # (10) MCV1 + SIA(zero dose first)
-    "mcv1-siaalt2",          # (11) MCV1 + SIA(already vaccinated first)
-    "mcv1-mcv2alt1-siaalt1", # (12) MCV1 + MCV2(early intro) + SIA(zero dose first)
-    "mcv1-mcv2alt2")         # (13) MCV1 + MCV2(early intro, gradual rollout)
-  
-  # set SIAs implementation method for each scenario
-  # additional modifications needed in Rcpp for extent-specific approaches
-  # ex. random reach for subnational campaign & 7.7% at national level for national and rollover-nat campaigns
-  # 0: no SIA
-  # 1: random reach (baseline assumption)
-  # 2: 7.7% less likely to be reached at national level
-  # 3: zero-dose first
-  # 4: already-vaccinated first
-  # 5: 7.7% less likely to be reached at subnational level
-  set_sia         <- c (0, 0, 0, 2, 2, 0, 2, 3, 4, 3, 4, 3, 0)
-  
-  # set routine vaccination parameters to distinguish between scenarios
-  # 0: no routine MCV
-  # 1: MCV1 only
-  # 2: MCV1 + MCV2
-  set_routine <- c (0, 1, 2, 2, 1, 2, 2, 2, 2, 1, 1, 2, 2)
-  
-  # ---- Generate vaccine coverage scenarios ----
-  
-  # Prepare coverage input data - update when the data are changed
-  if (o$reload_coverage)
-    lapply(vac_strategies, create_vaccine_coverage_routine_sia)
-  
-  
-  
-  
   
   # ---- Skip existing sims ----
   
-  message(" > Identifying previously completed simulations")
-  
-  # Extract IDs of sims that have already been run for each country
-  exist_pth = o$pth[[paste1("post", timeframe)]]
-  exist_id  = str_remove(list.files(exist_pth), ".rds$")
-  
-  # Logical whether simulation should be run / rerun
-  run_sim = !(sims$id %in% exist_id)
-  if (o$overwrite) run_sim[] = TRUE
-  
-  # Skip any existing sims (unless overwriting)
-  sims %<>%
-    cbind(run = run_sim) %>%
-    mutate(job_num = cumsum(run * 1), 
-           job_num = ifelse(run, job_num, NA))
-  
-  # Save scenario dataframe to file
-  saveRDS(sims, file = paste0(o$pth$sim_input, "simulations_", timeframe, ".rds"))
+  # message(" > Identifying previously completed simulations")
+  # 
+  # # Extract IDs of sims that have already been run for each country
+  # exist_pth = o$pth[[paste1("post", timeframe)]]
+  # exist_id  = str_remove(list.files(exist_pth), ".rds$")
+  # 
+  # # Logical whether simulation should be run / rerun
+  # run_sim = !(sims$id %in% exist_id)
+  # if (o$overwrite) run_sim[] = TRUE
+  # 
+  # # Skip any existing sims (unless overwriting)
+  # sims %<>%
+  #   cbind(run = run_sim) %>%
+  #   mutate(job_num = cumsum(run * 1), 
+  #          job_num = ifelse(run, job_num, NA))
+  # 
+  # # Save scenario dataframe to file
+  # saveRDS(sims, file = paste0(o$pth$sim_input, "simulations_", timeframe, ".rds"))
   
   # ---- Display number of sims ----
   
-  # Number of sims
-  n_total = nrow(sims)
-  n_run   = sum(sims$run)
-  
-  # Report total number of sims
-  message(" > Total number of simulations: ", thou_sep(n_total))
-  
-  # Report number of sims we'll run now
-  message("  - Skipping: ", thou_sep(n_total - n_run))
-  message("  - Simulating: ", thou_sep(n_run))
+  # # Number of sims
+  # n_total = nrow(sims)
+  # n_run   = sum(sims$run)
+  # 
+  # # Report total number of sims
+  # message(" > Total number of simulations: ", thou_sep(n_total))
+  # 
+  # # Report number of sims we'll run now
+  # message("  - Skipping: ", thou_sep(n_total - n_run))
+  # message("  - Simulating: ", thou_sep(n_run))
   
   return(sims)
 }
@@ -150,14 +125,12 @@ get_simulations = function() {
 # ---------------------------------------------------------
 get_simulation_id = function(sim) {
   
-  browser()
-  
-  # Format IDs from details, padding EIR and seed values
-  ids = paste(sim$country, 
-              sim$eir  %>% str_pad(4, pad = "0"), 
-              sim$seed %>% str_pad(3, pad = "0"), 
-              sim$scenario, 
-              sep = "_")
+  # Combine details to create unique simulation ID
+  ids = paste1(
+    sim$country, 
+    sim$set_routine, 
+    sim$set_sia, 
+    sim$scenario)
   
   return(ids)
 }
@@ -176,7 +149,7 @@ run_sim = function(job_id) {
   for (isia in c(1,2,5)){
     
     if (isia == 2){
-      sel_scns <- 1:length(vac_strategies) # main assumption
+      sel_scns <- 1:length(scenarios) # main assumption
       set_sia  <- c (0, 0, 0, 2, 2, 0, 2, 3, 4, 3, 4, 3, 0)
     } else {
       sel_scns <- c(2,3,4,5,7) # evaluate different SIA assumptions
@@ -185,7 +158,7 @@ run_sim = function(job_id) {
     
     for (index in sel_scns){
       
-      scenario_name  <- vac_strategies [index]
+      scenario_name  <- scenarios [index]
       message(" - ", scenario_name)
       
       scenario_number <- sprintf("scenario%02d", index)
@@ -205,7 +178,7 @@ run_sim = function(job_id) {
       # merge outputs into csv files
       get_burden_estimate(
         # vaccine_coverage_subfolder = var$vaccine_coverage_subfolder,
-        scenario_name              = vac_strategies [index],
+        scenario_name              = scenarios [index],
         save_scenario              = scenario_number,
         routine                = set_routine [index],
         using_sia                  = set_sia         [index],
@@ -237,7 +210,7 @@ run_sim = function(job_id) {
     
     for (index in sel_scns){
       
-      scenario_name   <- vac_strategies [index]
+      scenario_name   <- scenarios [index]
       scenario_number <- sprintf ("scenario%02d", index)
       
       # run model and estimate cases
@@ -252,7 +225,7 @@ run_sim = function(job_id) {
       
       # merge outputs into csv files
       get_burden_estimate(
-        scenario_name              = vac_strategies [index],
+        scenario_name              = scenarios [index],
         save_scenario              = sprintf ("scenario%02d", index),
         routine                = set_routine [index],
         using_sia                  = set_sia         [index],
