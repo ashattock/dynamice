@@ -36,16 +36,10 @@ packages = c(
   "tidyverse",      # Includes ggplot2, dplyr, tidyr (www.tidyverse.org/packages/)
   "data.table",     # Next generation dataframes
   "Rcpp",           # C++ integration
-  "gsubfn",         # Output multiple variables from functions
   "magrittr",       # Additional pipe operators, such as %<>%
-  # "rlist",          # List-related operation functions
   "wrapr",          # Convenience functions (eg qc)
-  # "stats",          # Statistical calculations and random number generation
-  # "matrixStats",    # Matrix row and column operations
-  # "wpp2022",        # Demographic data
   "countrycode",    # Country name <-> code transformation
   "readxl",         # Data loading functionality
-  # "yaml",           # Data loading functionality
   "lubridate",      # Data formatting functionality
   "naniar",         # Data formatting functionality
   "ggpubr",         # Plotting functionality

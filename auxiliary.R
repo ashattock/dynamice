@@ -359,19 +359,6 @@ pth_replace = function(pth, dir, dir_replace, sep = file_sep()) {
 }
 
 # ---------------------------------------------------------
-# Suppress output from a function call
-# ---------------------------------------------------------
-quiet = function(x) { 
-  sink_con = file("sink.txt")
-  sink(sink_con, type = "output")
-  sink(sink_con, type = "message")
-  on.exit(sink(type   = "output"))
-  on.exit(sink(type   = "message"), add = TRUE)
-  on.exit(file.remove("sink.txt"),  add = TRUE)
-  invisible(force(x)) 
-}
-
-# ---------------------------------------------------------
 # Convenience wrapper for readRDS
 # ---------------------------------------------------------
 read_rds = function(pth, ...) {
@@ -454,15 +441,6 @@ save_rds = function(x, pth, ...) {
 }
 
 # ---------------------------------------------------------
-# Allow scale_fill_fermenter to accept custom palettes
-# ---------------------------------------------------------
-scale_fill_fermenter_custom = function(cols, guide = "coloursteps", na.value = "grey50", ...) {
-  palette = ggplot2:::binned_pal(scales::manual_pal(cols))
-  g = binned_scale("fill", "fermenter", palette, guide = guide, na.value = na.value, ...)
-  return(g)
-}
-
-# ---------------------------------------------------------
 # Simple wrapper for sequence along dataframe rows
 # ---------------------------------------------------------
 seq_row = function(x) seq_len(nrow(x))
@@ -497,16 +475,6 @@ stop_if_errors = function(pth, err, err_tol = 0, msg = NULL) {
       stop(msg, " (", length(errors), " errors)\n\n", 
            paste(errors, collapse = "\n"))
   }
-}
-
-# ---------------------------------------------------------
-# Convert comma-seperated string to vector of elements
-# ---------------------------------------------------------
-str2vec = function(x, v) {
-  x[[v]] = x[[v]] %>% 
-    str_split(",", simplify = TRUE) %>% 
-    str_remove_all(" ")
-  return(x)
 }
 
 # ---------------------------------------------------------

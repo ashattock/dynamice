@@ -1,7 +1,7 @@
 ############################################################
 # SIMULATIONS
 #
-# Create, simulate, and post-process all simulations.
+# Create, run, and process all simulations.
 #
 ############################################################
 
@@ -36,6 +36,11 @@ run_simulations = function() {
     # Throw an error if any cluster jobs failed (see auxiliary.R)
     stop_if_errors(o$pth$log, o$err_file, err_tol = 1)
   }
+  
+  # ---- Concatenate output ----
+  
+  # Aggregate results for each country
+  run_aggregate(sims)
 }
 
 # ---------------------------------------------------------
@@ -68,16 +73,16 @@ get_simulations = function() {
   # ---- Skip existing sims ----
   
   message(" > Identifying previously completed simulations")
-
+  
   # Extract IDs of sims that have already been run
   exist_id = intersect(
     str_remove(list.files(o$pth$sims),   ".rds$"), 
     str_remove(list.files(o$pth$burden), ".rds$"))
-
+  
   # Logical whether simulation should be run / rerun
   run_sim = !(sims$id %in% exist_id)
   if (o$overwrite) run_sim[] = TRUE
-
+  
   # Skip any existing sims (unless overwriting)
   sims %<>%
     cbind(run = run_sim) %>%
@@ -92,10 +97,10 @@ get_simulations = function() {
   # Number of sims
   n_total = nrow(sims)
   n_run   = sum(sims$run)
-
+  
   # Report total number of sims
   message(" > Total number of simulations: ", thou_sep(n_total))
-
+  
   # Report number of sims we'll run now
   message("  - Skipping: ", thou_sep(n_total - n_run))
   message("  - Simulating: ", thou_sep(n_run))
@@ -106,10 +111,10 @@ get_simulations = function() {
 # ---------------------------------------------------------
 # Create simulation ID convention 
 # ---------------------------------------------------------
-get_simulation_id = function(sim) {
+get_simulation_id = function(sims) {
   
   # Combine scenario details to create sim ID
-  ids = sim %>%
+  ids = sims %>%
     mutate(r0_str = ifelse(is.na(r0), "def", r0),
            r0_str = str_pad(r0_str, 2, pad = "0")) %>%
     mutate(id = paste1(country, r0_str, scenario)) %>%
@@ -117,7 +122,7 @@ get_simulation_id = function(sim) {
   
   return(ids)
 }
-  
+
 # ---------------------------------------------------------
 # All steps to actually simulate the model
 # ---------------------------------------------------------
@@ -152,5 +157,55 @@ run_sim = function(job_id) {
   
   # Estimate disease burden from model outcomes
   run_burden(sim, data)  # See model.R
+}
+
+# ---------------------------------------------------------
+# Aggregate results for each country
+# ---------------------------------------------------------
+run_aggregate = function(sims) {
+  
+  message(" > Aggregating simulation outputs")
+  
+  # Initiate a progress bar
+  n  = length(o$countries) * length(o$scenarios)
+  pb = start_progress_bar(n)
+  
+  # Initiate a counter
+  i = 0
+  
+  # Loop through countries and scenarios
+  for (country in o$countries) {
+    for (scenario in o$scenarios) {
+      
+      # IDs for this country and scenario
+      ids = sims %>%
+        filter(country  == !!country, 
+               scenario == !!scenario) %>%
+        pull(id)
+      
+      # Associated disease burden files
+      files = paste0(o$pth$burden, ids, ".rds")
+      
+      # Load results and append details
+      results_dt = rbindlist(lapply(files, readRDS)) %>%
+        left_join(y  = sims, 
+                  by = "id") %>%
+        select(country, scenario, r0, 
+               year, age, metric, value)
+      
+      save_name = paste1(country, scenario)
+      save_file = paste0(o$pth$compiled, save_name, ".rds")
+      
+      # Save disease burden estimates
+      saveRDS(results_dt, file = save_file)
+      
+      # Update progress bar
+      i = i + 1
+      setTxtProgressBar(pb, i)
+    }
+  }
+  
+  # Close progress bar
+  close(pb)
 }
 

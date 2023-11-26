@@ -16,7 +16,7 @@
 #  LOG_FILE: Text log file that stores IDs of completed tasks
 #
 # Various sbatch options can be set in options.R (see 'cluster settings' 
-# section). For example, cluster partition, job memory, and slurm queue.
+# section). For example, job memory, job time, and slurm queue.
 #
 ############################################################
 

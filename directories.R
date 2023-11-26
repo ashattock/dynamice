@@ -34,10 +34,11 @@ prepare_dirs = function(o) {
   # ---- Output directories ----
 
   # Path to model output, results, and figures
-  pth$sims    = set_pth("output", "1_simulations")
-  pth$burden  = set_pth("output", "2_burden")
-  pth$results = set_pth("output", "3_results")
-  pth$figures = set_pth("output", "4_figures")
+  pth$sims     = set_pth("output", "1_simulations")
+  pth$burden   = set_pth("output", "2_burden")
+  pth$compiled = set_pth("output", "3_compiled")
+  pth$results  = set_pth("output", "4_results")
+  pth$figures  = set_pth("output", "5_figures")
   
   # Directory for cluster logs
   pth$log = set_pth("log")
