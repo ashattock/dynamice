@@ -17,7 +17,7 @@ if (length(args) > 0) {
   
 } else {  # Otherwise set defaults - use for testing and debugging
   job_fn = "run_sim"
-  job_id = 1
+  job_id = 49
 }
 
 # Reload simulation options into global environment

@@ -7,6 +7,64 @@
 ###########################################################
 
 # ---------------------------------------------------------
+# Prepare coverage data by splitting into routine and SIA
+# ---------------------------------------------------------
+run_prepare = function() {
+  
+  # Only continue if specified by do_step
+  if (!is.element(1, o$do_step)) return()
+  
+  message("* Preparing model resources")
+  
+  # Function for constructing file paths
+  get_path = function(x)
+    paste0(o$pth$coverage, paste1(x, scenario), ".csv")
+  
+  # Function for converting age in years to week reference
+  #
+  # For age < 3 years, weekly age (0 year: 1-52, 1 year: 53-104, 2 year: 105-156)
+  # For age >= 3 years, yearly age (3 year: 157, 100 year: 254)
+  year2week = function(year) {
+    
+    # Convert to week value
+    week = ifelse(
+      test = year < 3, 
+      yes  = round(year * 52), 
+      no   = round((year - 2) + (3 * 52)))
+    
+    return(week)
+  }
+  
+  # Repeat for each scenario of interest
+  for (scenario in o$scenarios) {
+    
+    # Routine vaccine coverage
+    routine_dt = fread(get_path("coverage")) %>%
+      filter(country %in% o$countries, 
+             vaccine != "SIA") %>%
+      select(vaccine, country, year, coverage)
+    
+    # SIA vaccine coverage
+    sia_dt = fread(get_path("coverage")) %>%
+      filter(country %in% o$countries, 
+             vaccine == "SIA", 
+             coverage > 0) %>%
+      # Convert age in years to weeks...
+      mutate(a0 = year2week(age_first), 
+             a1 = year2week(age_last)) %>%
+      # Some fine adaptions...
+      mutate(a0 = ifelse(age_first < 3, a0 + 1, a0), # Starting next weekly age
+             a0 = pmax(a0, 1),      # Bound below by 1
+             a1 = pmax(a1, 1)) %>%  # Bound below by 1
+      select(-age_first, -age_last)
+    
+    # Save coverage to file for routine vaccination and SIAs
+    fwrite(routine_dt, file = get_path("routine"))
+    fwrite(sia_dt,     file = get_path("sia"))
+  }
+}
+
+# ---------------------------------------------------------
 # Prepare model parameters
 # ---------------------------------------------------------
 prepare_params = function(data) {
@@ -48,7 +106,7 @@ prepare_params = function(data) {
 }
 
 # ---------------------------------------------------------
-# Load data for this country and this scenario
+# Prepare data for this country and this scenario
 # ---------------------------------------------------------
 prepare_data = function(sim) {
   
@@ -100,7 +158,7 @@ prepare_data = function(sim) {
   data$rnought = NULL
   
   # ---- Other data considerations ----
-
+  
   # Update timeliness if MCV1 not given at 39 weeks (9 months)
   if (data$vax_age$mcv1 != 39)
     data$timeliness[!is.na(age), timeliness := ifelse(age < data$vax_age$mcv1, 0, 1)]
@@ -119,8 +177,6 @@ load_coverage = function(sim, type) {
   
   # Load coverage data and filter for years of interest
   coverage_data = fread(file_path) %>%
-    select(-country) %>%
-    rename(country = country_code) %>%
     filter(country %in% sim$country, 
            year %in% o$years)
   
@@ -131,61 +187,5 @@ load_coverage = function(sim, type) {
   }
   
   return(coverage_data)
-}
-
-# ---------------------------------------------------------
-# Splits VIMC coverage files into routine (MCV1, MCV2) and SIAs
-# ---------------------------------------------------------
-create_coverage = function() {
-  
-  browser()
-  
-  # Repeat for each scenario of interest
-  for (scenario in o$scenarios) {
-    
-    # Coverage file for this scenario - to be split between routine and SIA
-    file = list(
-      coverage = paste0(o$pth$coverage, "coverage_", scenario, ".csv"), 
-      routine  = paste0(o$pth$coverage, "routine_",  scenario, ".csv"), 
-      sia      = paste0(o$pth$coverage, "sia_",      scenario, ".csv"))
-    
-    # read vaccine coverage data file
-    vaccov <- fread(file = file$coverage, na.strings = "<NA>")
-    
-    # select routine vaccination coverage
-    keep_cols_routine <- c("vaccine", "country_code", "country", "year", "coverage")
-    routine <- vaccov [activity_type != "campaign", ..keep_cols_routine]
-    
-    # select campaigns with coverage > 0 and with information of target population size
-    keep_cols_sia <- c("vaccine", "country_code", "country", "year", "extent", "mid_day",
-                       "age_first", "age_last", "age_range_verbatim", "target", "coverage", "coverage_subnat")
-    sia <- vaccov [activity_type == "campaign" & ( !is.na(target) & !is.na(coverage) & coverage != 0),
-                   ..keep_cols_sia]
-    
-    # check if national or subnational coverage >100%
-    if (nrow(sia[coverage > 1 | coverage_subnat > 1]) > 0)
-      stop ("national or subnational coverage > 100%")
-    
-    # -----------------------------------------------------------------------------------
-    # calculate values for a0 and a1 to match the age groups
-    sia [, `:=` (a0 = 0, a1 = 0)] #reached = round (as.numeric(target) * as.numeric(coverage))
-    
-    # for age < 3 years, weekly age (0 year: 1-52, 1 year: 53-104, 2 year: 105-156)
-    # for age >= 3 years, yearly age (3 year: 157, 100 year: 254)
-    find.a <- function (x) {
-      t0 <- ifelse (x < 3, round (x * 52), round ((x - 2) + (3 * 52)) )
-      return (t0) }
-    
-    sia [, `:=` (a0 = find.a(age_first), a1 = find.a(age_last))]
-    sia [age_first < 3, a0 := a0 + 1] # starting the next weekly age
-    
-    # set age == 0 year as 1 week
-    sia [a0 == 0, a0 := 1]
-    sia [a1 == 0, a1 := 1]
-    
-    # write vaccine coverage data for routine vaccination and SIAs
-    fwrite(x = routine, file = file$routine)
-    fwrite(x = sia,     file = file$sia)
-  }
 }
 

@@ -14,7 +14,7 @@ plot_burden_averted = function() {
   
   # Load central results for all scenarios
   results_dt = load_central_results()
-  
+
   # ---- Disease burden over time ----
   
   # Summarise over all ages
@@ -36,7 +36,10 @@ plot_burden_averted = function() {
     g = ggplot(metric_dt) +
       aes(x = year, y = value, colour = scenario) +
       geom_line() +
-      facet_wrap(~country_name, scales = "free_y")
+      facet_wrap(~country_name, scales = "free_y") +
+      # Prettify y axis...
+      scale_y_continuous(
+        labels = comma)
     
     # Save figure to file
     save_fig(g, "Disease burden", metric)
@@ -69,7 +72,10 @@ plot_burden_averted = function() {
     g = ggplot(metric_dt) +
       aes(x = year, y = value, colour = scenario) +
       geom_line() +
-      facet_wrap(~country_name, scales = "free_y")
+      facet_wrap(~country_name, scales = "free_y") +
+      # Prettify y axis...
+      scale_y_continuous(
+        labels = comma)
     
     # Save figure to file
     save_fig(g, "Disease burden averted", metric)
@@ -89,7 +95,10 @@ plot_burden_averted = function() {
   g = ggplot(total_dt) +
     aes(x = year, y = value, colour = scenario) +
     geom_line() + 
-    facet_wrap(~metric, scales = "free_y")
+    facet_wrap(~metric, scales = "free_y") + 
+    # Prettify y axis...
+    scale_y_continuous(
+      labels = comma)
   
   # Save figure to file
   save_fig(g, "Disease burden averted total")

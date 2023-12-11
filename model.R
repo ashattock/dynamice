@@ -5,6 +5,8 @@
 #
 ###########################################################
 
+# TODO: Figure out why we're getting the NAN's - too few infectious?
+
 # ------------------------------------------------------------------------------
 # Run measles model for a given country and scenario
 # ------------------------------------------------------------------------------
@@ -184,7 +186,7 @@ run_model = function(sim, data) {
         a0 = cy_coverage_sia$a0,
         a1 = cy_coverage_sia$a1,
         siacov = as.double(cy_coverage_sia$coverage),
-        siacov_subnat = as.double(cy_coverage_sia$ coverage_subnat),
+        siacov_subnat = as.double(cy_coverage_sia$coverage_subnat),
         sia_subnat = as.integer(ifelse (cy_coverage_sia$extent %in% c("sub-national", "unknown"), 1, 0)), # distinguish subnational campaigns
         sia_tstep = as.integer(c(t_sia_days, 2000))  # add a larger-than-max-timestep number to stop loops in Rcpp
       )
@@ -271,6 +273,10 @@ run_burden = function(sim, data) {
   
   # Load already simulated model output
   model_output = readRDS(paste0(o$pth$sims, sim$id, ".rds"))
+  
+  # TEMP: Deal with missing values...
+  model_output %<>%
+    replace_na(list(cases0d = 0, cases1d = 0, cases2d = 0))
   
   # Case fatality rate - some filling needed
   cfr_dt = expand_grid(year = o$years, 

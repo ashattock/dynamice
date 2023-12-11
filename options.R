@@ -29,10 +29,10 @@ set_options = function(do_step = NA, quiet = FALSE) {
   o$countries = "all" # qc(AGO, CHN, COD, ETH, IDN, IND, MDG, MWI, NGA, PAK, PHL, SOM, UGA, UKR)
   
   # Scenarios to simulate (scenario ID or "all")
-  o$scenarios = "all" # qc(nomcv, mcv1)
+  o$scenarios = c("nomcv", "mcv1_mcv2_sia")
   
   # Years to analyse
-  o$years = 1980 : 2024
+  o$years = 1974 : 2024
   
   # Age range 
   o$ages = 0 : 100
@@ -51,11 +51,6 @@ set_options = function(do_step = NA, quiet = FALSE) {
   
   # Model metrics to report
   o$metrics = c("deaths", "dalys", "yll")
-
-  # ---- Data settings ----
-  
-  # Force re-construct coverage data
-  o$reload_coverage = FALSE
   
   # ---- Cluster settings ----
   
@@ -85,11 +80,11 @@ set_options = function(do_step = NA, quiet = FALSE) {
   # ---- Results and plotting flags ----
   
   # Produce main VIMC outputs
-  o$do_vimc_files = FALSE
+  o$do_vimc_files = TRUE
 
   # Turn figures on or off
-  o$plot_coverage       = FALSE
-  o$plot_everything     = FALSE
+  o$plot_coverage       = FALSE  # TODO: Not yet integrated
+  o$plot_everything     = FALSE  # TODO: Not yet integrated
   o$plot_burden_averted = TRUE
 
   # ---- Plotting settings ----

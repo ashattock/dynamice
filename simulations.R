@@ -11,13 +11,9 @@
 run_simulations = function() {
   
   # Only continue if specified by do_step
-  if (!is.element(1, o$do_step)) return()
+  if (!is.element(2, o$do_step)) return()
   
   message("* Running vaccine simulations")
-  
-  # Prepare coverage input data
-  if (o$reload_coverage)
-    create_coverage()
   
   # Generate full set of simulations to run
   sims = get_simulations()
@@ -177,7 +173,8 @@ run_aggregate = function(sims) {
       files = paste0(o$pth$burden, ids, ".rds")
       
       # Load results and append details
-      results_dt = rbindlist(lapply(files, readRDS)) %>%
+      results_dt = lapply(files, readRDS) %>%
+        rbindlist() %>%
         left_join(y  = sims, 
                   by = "id") %>%
         select(country, scenario, r0, 
