@@ -4,8 +4,8 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List rcpp_vaccine_oney(NumericMatrix in_Comp, List parm, List siaparm, NumericMatrix beta_full,
-                       NumericVector pop_full, NumericVector cov1, double cov2, int t_start)
+List rcpp_model(NumericMatrix in_Comp, List parm, List siaparm, NumericMatrix beta_full,
+                NumericVector pop_full, NumericVector cov1, double cov2, int t_start)
 {
   /* This function runs measles transmission, ageing, and vaccination at a specific age group and timestep
    during calendar years for sumulation. 

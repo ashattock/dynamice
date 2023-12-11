@@ -16,17 +16,17 @@ run_prepare = function() {
   
   message("* Preparing model resources")
   
+  # ---- Prepare coverage files ----
+  
   # Function for constructing file paths
   get_path = function(x)
     paste0(o$pth$coverage, paste1(x, scenario), ".csv")
   
   # Function for converting age in years to week reference
-  #
-  # For age < 3 years, weekly age (0 year: 1-52, 1 year: 53-104, 2 year: 105-156)
-  # For age >= 3 years, yearly age (3 year: 157, 100 year: 254)
   year2week = function(year) {
     
-    # Convert to week value
+    # For age < 3 years, weekly age (0 year: 1-52, 1 year: 53-104, 2 year: 105-156)
+    # For age >= 3 years, yearly age (3 year: 157, 100 year: 254)
     week = ifelse(
       test = year < 3, 
       yes  = round(year * 52), 
@@ -129,16 +129,25 @@ prepare_data = function(sim) {
     ref = str_remove_all(file, "(^data_|.rds$)")
     
     # Load data file
-    this_data = readRDS(paste0(o$pth$input, file))
+    all_data = readRDS(paste0(o$pth$input, file))
     
     # Filter datatable for this country
-    if (is.data.frame(this_data))
-      data[[ref]] = this_data[country == sim$country]
+    if (is.data.frame(all_data))
+      this_data = all_data[country == sim$country]
     
     # ... or select list element for this country
-    if (!is.data.frame(this_data))
-      data[[ref]] = this_data[[sim$country]]
+    if (!is.data.frame(all_data))
+      this_data = all_data[[sim$country]]
+    
+    # Impute values from regional countries if missing
+    if (is.null(this_data) || nrow(this_data) == 0)
+      this_data = impute_missing_data(ref, all_data, sim$country)
+    
+    # Store data
+    data[[ref]] = this_data
   }
+  
+  browser()
   
   # ---- Set basic reproduction number ----
   
@@ -187,5 +196,152 @@ load_coverage = function(sim, type) {
   }
   
   return(coverage_data)
+}
+
+# ---------------------------------------------------------
+# Impute values from regional countries if missing
+# ---------------------------------------------------------
+impute_missing_data = function(ref, all_data, country) {
+  
+  region_dt = fread(paste0(o$pth$config, "regions.csv"))
+  
+  region = region_dt %>%
+    filter(country == !!country) %>% 
+    pull(region)
+  
+  # ---- CFR ----
+  
+  # Check data reference
+  if (ref == "cfr_portnoy_21") {
+    
+    # Mean of countries in region
+    this_data = all_data %>%
+      left_join(y  = region_dt, 
+                by = "country") %>%
+      filter(region == !!region) %>%
+      group_by(year, age) %>%
+      summarise(cfr = mean(cfr)) %>%
+      ungroup() %>%
+      mutate(country = country) %>%
+      select(all_of(names(all_data))) %>%
+      as.data.table()
+  }
+  
+  # ---- R0 ----
+  
+  # Check data reference
+  if (ref == "rnought") {
+    
+    # Mean of countries in region
+    this_data = all_data %>%
+      left_join(y  = region_dt, 
+                by = "country") %>%
+      group_by(region) %>%
+      summarise(r0 = mean(r0)) %>%
+      ungroup() %>%
+      filter(region == !!region) %>%
+      mutate(country = country) %>%
+      select(all_of(names(all_data))) %>%
+      as.data.table()
+  }
+  
+  # ---- Timeliness ----
+  
+  # Check data reference
+  if (ref == "timeliness") {
+    
+    # Retain ordering
+    order_dt = all_data %>%
+      select(age, timeliness) %>%
+      unique()
+    
+    # Mean of countries in region
+    mean_data = all_data %>%
+      left_join(y  = region_dt, 
+                by = "country") %>%
+      filter(region == !!region) %>%
+      group_by(age, timeliness) %>%
+      summarise(prop_final_cov = mean(prop_final_cov)) %>%
+      ungroup() %>%
+      as.data.table()
+    
+    # Join mean to original ordering
+    this_data = all_data %>%
+      select(age, timeliness) %>%
+      unique() %>%
+      left_join(y  = mean_data, 
+                by = c("age", "timeliness")) %>%
+      mutate(country = country) %>%
+      select(all_of(names(all_data)))
+  }
+  
+  # ---- Life expectancy ----
+  
+  # Check data reference
+  if (ref == "life_exp") {
+    
+    # Mean of countries in region
+    this_data = all_data %>%
+      left_join(y  = region_dt, 
+                by = "country") %>%
+      filter(region == !!region) %>%
+      group_by(year) %>%
+      summarise(value = mean(value)) %>%
+      ungroup() %>%
+      mutate(country = country) %>%
+      select(all_of(names(all_data))) %>%
+      as.data.table()
+  }
+  
+  # ---- Population ----
+  
+  # Check data reference
+  if (ref == "population") {
+    
+    warning("Population data needs to be updated for new countries")
+    
+    # Mean of countries in region
+    this_data = all_data %>%
+      left_join(y  = region_dt, 
+                by = "country") %>%
+      filter(region == !!region) %>%
+      group_by(age_from, age_to, year, gender) %>%
+      summarise(value = mean(value)) %>%
+      ungroup() %>%
+      mutate(country = country) %>%
+      select(all_of(names(all_data))) %>%
+      as.data.table()
+  }
+  
+  # ---- Contact rate ----
+  
+  # Check data reference
+  if (ref == "contact") {
+    
+    # Regional neighbours to take mean over
+    neighbours = region_dt %>%
+      filter(region == !!region) %>% 
+      pull(country) %>%
+      intersect(names(all_data))
+    
+    # Extract data from regional neighbours
+    data_list = all_data[neighbours]
+    data_dims = dim(data_list[[1]])
+    
+    # Combine into 3D array
+    #
+    # See: stackoverflow.com/questions/26018216/calculating-mean-of-multiple-matrices-in-r
+    data_array = array(
+      data = do.call(cbind, data_list), 
+      dim  = c(data_dims, length(neighbours)))
+    
+    # Take the mean to derive country values
+    this_data = apply(data_array, c(1, 2), mean)
+  }
+  
+  if (!exists("this_data"))
+    browser()
+  
+  return(this_data)
 }
 

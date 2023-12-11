@@ -18,6 +18,8 @@ run_simulations = function() {
   # Generate full set of simulations to run
   sims = get_simulations()
   
+  browser()
+  
   # ---- Submit simulations to cluster ----
   
   # Number of jobs to be run
@@ -135,6 +137,8 @@ run_sim = function(job_id) {
   
   # Prepare model input data
   data = prepare_data(sim)  # See prepare.R
+  
+  browser()
   
   # ---- Simulate model ----
   
