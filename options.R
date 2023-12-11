@@ -61,11 +61,11 @@ set_options = function(do_step = NA, quiet = FALSE) {
   o$overwrite = FALSE
   
   # Time allocated for each cluster job
-  o$job_time  = "00:10:00"  # Use "HH:MM:SS" format
+  o$job_time  = "00:05:00"  # Use "HH:MM:SS" format
   o$job_queue = "30min"  # Queue to use (check out scicore wiki if unfamiliar)
   
   # Memory to allocate for each cluster job
-  o$job_memory = "1GB"
+  o$job_memory = "500MB"
   
   # Set an upper limit for jobs that can be run at any one time
   o$job_limit = 2000

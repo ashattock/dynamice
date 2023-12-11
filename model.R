@@ -81,8 +81,6 @@ run_model = function(sim, data) {
     #old script groups those aged 70-80, but division is by actual population size
     pop.vector <- data$population[year == y, value]
     
-    browser()
-    
     # first expand polymod matrix (contact_tstep) and population vector and
     # then divide by population sizes, otherwise it doesn't work.
     pop.vector_full <- c(rep(pop.vector[1:jt]/s, each = s), pop.vector[(jt +1):length(pop.vector)])

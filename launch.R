@@ -15,7 +15,7 @@ source("dependencies.R")
 message("Running DynaMICE for EPI50 analysis")
 
 # Set options (see options.R)
-o = set_options(do_step = 1)
+o = set_options(do_step = 1 : 3)
 
 # Step 1) Prepare inputs
 run_prepare()  # See prepare.R

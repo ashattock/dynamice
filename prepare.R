@@ -18,7 +18,7 @@ run_prepare = function() {
   
   # Prepare coverage files
   prepare_coverage()
-
+  
   # Prepare raw vaccine schedule data
   prepare_schedule()
 }
@@ -79,21 +79,35 @@ prepare_coverage = function() {
 # ---------------------------------------------------------
 prepare_schedule = function() {
   
+  # ---- Load and clean raw data ----
+  
+  # Raw data file from WHO
+  #
+  # SOURCE: immunizationdata.who.int/pages/schedule-by-disease/measles.html
+  schedule_file = "vaccination_schedule.csv"
+  schedule_path = paste0(o$pth$input, schedule_file)
+  
+  # Map unit references to scalers required for week format
   unit_dict = data.table(
     unit = c("Y", "M", "W"), 
     mult = c(52, 52/12, 1))
   
+  # Regular expression for extracting year, month, week units
   unit_exp = paste(unit_dict$unit, collapse = ",")
   unit_exp = paste0("[", unit_exp, "]")
   
-  schedule_file = "vaccination_schedule.csv"
-  schedule_path = paste0(o$pth$input, schedule_file)
-  
+  # Load and clean data
   schedule_dt = fread(schedule_path) %>%
+    # Retain only necessary columns...
+    select(country  = ISO_3_CODE, 
+           year     = YEAR, 
+           schedule = SCHEDULEROUNDS, 
+           target   = TARGETPOP, 
+           age      = AGEADMINISTERED) %>%
     # Retain general routine doses for countries of interest...
     filter(country  %in% o$countries,
            schedule %in% c(1, 2),
-           target_pop == "") %>%
+           target == "") %>%
     # Parse age string into value and unit...
     mutate(unit  = str_extract(age, unit_exp), 
            value = str_extract(age, "[0-9]+")) %>%
@@ -104,14 +118,14 @@ prepare_schedule = function() {
     mutate(weeks = mult * as.numeric(value)) %>%
     # Take the mean where we have multiple entires...
     group_by(country, schedule) %>%
-    summarise(age = mean(weeks)) %>%
+    summarise(age = round(mean(weeks))) %>%
     ungroup() %>%
     # If over 3 years old, convert to annual increments...
     mutate(age = ifelse(
       test = age > 52 * 3, 
       yes  = 52 * 3 + floor(age / 52 - 2), 
       no   = age)) %>%
-    # ...
+    # Convert to wide format...
     mutate(schedule = paste0("mcv", schedule)) %>%
     pivot_wider(names_from  = schedule, 
                 values_from = age) %>%
@@ -119,9 +133,42 @@ prepare_schedule = function() {
     arrange(country) %>%
     as.data.table()
   
-  # regional_mean = schedule_dt
+  # ---- Impute any missing values with regional average ----
+  
+  # Only needed to any data missing
+  if (any(is.na(schedule_dt))) {
     
-  browser()
+    # Load country-region details
+    region_dt = fread(paste0(o$pth$config, "regions.csv"))
+    
+    # Take the mean from each region
+    regional_mean = schedule_dt %>%
+      left_join(y  = region_dt, 
+                by = "country") %>%
+      group_by(region) %>%
+      summarise(mcv1_mean = round(mean(mcv1, na.rm = TRUE)), 
+                mcv2_mean = round(mean(mcv2, na.rm = TRUE))) %>%
+      ungroup() %>%
+      as.data.table()
+    
+    # Impute missing values with regional mean
+    schedule_dt %<>%    
+      left_join(y  = region_dt, 
+                by = "country") %>%  
+      left_join(y  = regional_mean, 
+                by = "region") %>%
+      mutate(mcv1 = ifelse(is.na(mcv1), mcv1_mean, mcv1), 
+             mcv2 = ifelse(is.na(mcv2), mcv2_mean, mcv2)) %>%
+      select(country, mcv1, mcv2)
+  }
+  
+  # ---- Write (or overwrite data file) ----
+  
+  # File path and name to save to
+  save_file = paste0(o$pth$input, "data_vax_age.rds")
+  
+  # Save the file in input dir
+  saveRDS(schedule_dt, file = save_file)
 }
 
 # ---------------------------------------------------------
@@ -207,8 +254,6 @@ prepare_data = function(sim) {
     data[[ref]] = this_data
   }
   
-  browser()
-  
   # ---- Set basic reproduction number ----
   
   # If provided, use scenario-specific R0
@@ -263,8 +308,10 @@ load_coverage = function(sim, type) {
 # ---------------------------------------------------------
 impute_missing_data = function(ref, all_data, country) {
   
+  # Load country-region details
   region_dt = fread(paste0(o$pth$config, "regions.csv"))
   
+  # Region of country in question
   region = region_dt %>%
     filter(country == !!country) %>% 
     pull(region)
@@ -398,9 +445,6 @@ impute_missing_data = function(ref, all_data, country) {
     # Take the mean to derive country values
     this_data = apply(data_array, c(1, 2), mean)
   }
-  
-  if (!exists("this_data"))
-    browser()
   
   return(this_data)
 }
