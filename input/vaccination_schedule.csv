@@ -1,0 +1,519 @@
+vaccine,country,year,schedule,target_pop,scope,age,comments
+MMR,ABW,2022,1,,NATIONAL,M12,
+MMR,ABW,2022,2,,NATIONAL,Y4,
+Measles,AFG,2022,1,,NATIONAL,M9,0-18 months
+Measles,AFG,2022,2,,NATIONAL,M18,0-18 months
+MR,AGO,2022,1,,NATIONAL,M9,9-15 mois
+MR,AGO,2022,2,,NATIONAL,M15,9-15 mois
+MMR,AIA,2022,1,,NATIONAL,Y1,12 month old and 24 months old
+MMR,AIA,2022,2,,NATIONAL,Y2,12 month old and 24 months old
+MMR,ALB,2022,1,,NATIONAL,Y1,
+MMR,ALB,2022,2,,NATIONAL,Y5,
+MMR,AND,2022,1,,NATIONAL,M12,
+MMR,AND,2022,2,,NATIONAL,Y3,
+MMR,ARE,2022,1,,NATIONAL,M12,
+MMR,ARE,2022,2,,NATIONAL,M18,
+MR,ARG,2022,1,RISKGROUPS,NATIONAL,1st contact,Puérperas. Adultos y niños de poblaciones seleccionadas para actividades intensificadas de vacunación para contención de brote de sarampión.
+MMR,ARG,2022,1,,NATIONAL,Y1,11 años se puede iniciar o completar esquema
+MMR,ARG,2022,2,,NATIONAL,Y5,11 años se puede iniciar o completar esquema
+MR,ARG,2022,2,RISKGROUPS,NATIONAL,0,Puérperas. Adultos y niños de poblaciones seleccionadas para actividades intensificadas de vacunación para contención de brote de sarampión.
+MMR,ARM,2022,1,,NATIONAL,Y1,
+MMR,ARM,2022,1,RISKGROUPS,NATIONAL,,?? ??????????????
+MMR,ARM,2022,2,,NATIONAL,Y4-Y6,
+MMR,ARM,2022,3,,NATIONAL,Y15-Y16,"?????? ???? ???????? ?????? ????? ???????????? ???????? 15-16 ???, ?? ??????? 2 ????"
+MMR,ATG,2022,1,,NATIONAL,M12,
+MMR,ATG,2022,2,,NATIONAL,M18,
+MMR,AUS,2022,1,,NATIONAL,M12,
+MMRV,AUS,2022,2,,NATIONAL,M18,
+MMR,AUT,2022,1,,NATIONAL,M9,
+MMR,AUT,2022,1,CATCHUP_C,NATIONAL,,Catch-up for everybody regardless of age
+MMR,AUT,2022,1,CATCHUP_A,NATIONAL,,Catch-up for everybody regardless of age
+MMR,AUT,2022,2,,NATIONAL,0,
+MMR,AZE,2022,1,,NATIONAL,M12,
+MMR,AZE,2022,2,,NATIONAL,Y6,
+MR,BDI,2022,1,,NATIONAL,M9,0-23 mois
+MR,BDI,2022,2,,NATIONAL,M18,0-23 mois
+MMR,BEL,2022,1,,NATIONAL,M12,2nd dose - Y10 in Flemish community; French and German speaking community: Y7-Y8 since Sept 2020 and Y11-Y12 (till August 2020 + catch-up vaccination of cohort in between Y7-Y8 and Y11-Y12 till 2024). The change to Y7-Y8 is also foreseen in Flanders (in September 2023).
+MMR,BEL,2022,1,CATCHUP_C,NATIONAL,,2nd dose - Y10 in Flemish community; French and German speaking community: Y7-Y8 since Sept 2020 and Y11-Y12 (till August 2020 + catch-up vaccination of cohort in between Y7-Y8 and Y11-Y12 till 2024). The change to Y7-Y8 is also foreseen in Flanders (in September 2023).
+MMR,BEL,2022,2,,NATIONAL,Y7-Y12,2nd dose - Y10 in Flemish community; French and German speaking community: Y7-Y8 since Sept 2020 and Y11-Y12 (till August 2020 + catch-up vaccination of cohort in between Y7-Y8 and Y11-Y12 till 2024). The change to Y7-Y8 is also foreseen in Flanders (in September 2023).
+MR,BEN,2022,1,,NATIONAL,M9,Survivants
+MR,BFA,2022,1,,NATIONAL,M9,0-11 mois et 15-18 mois
+MR,BFA,2022,2,,NATIONAL,M15,0-11 mois et 15-18 mois
+MR,BGD,2022,1,,NATIONAL,W38,<1 year children;  15-18m children
+MR,BGD,2022,2,,NATIONAL,M15,<1 year children;  15-18m children
+MMR,BGR,2022,1,,NATIONAL,M13,
+MMR,BGR,2022,2,,NATIONAL,Y12,
+MMR,BHR,2022,1,RISKGROUPS,NATIONAL,,"Given for non-immune women at reproductive age group discovered during premarital counselling, postnatally for non-immune women discovered during antenatal screening, those discovered during preschool screening (without 2 valid MMR doses), if cases identified in a residency blocks, travellers to endemic countries and Hajj Pilgrims, healthcare workers."
+MMR,BHR,2022,1,,NATIONAL,M12,"Routine childhood vaccine, given at the age of 12 and 18 months."
+MMR,BHR,2022,1,HW,NATIONAL,,"Given for non-immune women at reproductive age group discovered during premarital counselling, postnatally for non-immune women discovered during antenatal screening, those discovered during preschool screening (without 2 valid MMR doses), if cases identified in a residency blocks, travellers to endemic countries and Hajj Pilgrims, healthcare workers."
+MMR,BHR,2022,2,,NATIONAL,M18,"Routine childhood vaccine, given at the age of 12 and 18 months."
+MMR,BHS,2022,1,,NATIONAL,M12,
+MMR,BHS,2022,2,,NATIONAL,M15,
+MMR,BIH,2022,1,,NATIONAL,Y1,
+MMR,BIH,2022,1,RISKGROUPS,NATIONAL,,Travellers
+MMR,BIH,2022,2,,NATIONAL,Y6,
+MMR,BLR,2022,1,,NATIONAL,Y1,
+MMR,BLR,2022,2,,NATIONAL,Y6,
+MMR,BLZ,2022,1,,NATIONAL,M12,Children 12 and 18 months
+MMR,BLZ,2022,2,,NATIONAL,M18,Children 12 and 18 months
+MMR,BMU,2022,1,,NATIONAL,M15,
+MMR,BMU,2022,2,,NATIONAL,Y4-Y6,
+MMR,BOL,2022,1,,NATIONAL,M12,La segunda dosis de SRP se incluyo en el esquema nacional en la gestión 2018
+MMR,BOL,2022,2,,NATIONAL,M18-M23,La segunda dosis de SRP se incluyo en el esquema nacional en la gestión 2018
+MMR,BRA,2022,1,ADULTS,NATIONAL,,offered to people up to 49 years
+MMR,BRA,2022,1,,NATIONAL,M12,
+MMRV,BRA,2022,2,,NATIONAL,M15,
+MMR,BRB,2022,1,,NATIONAL,M12,
+MMR,BRB,2022,2,,NATIONAL,M18,
+MMR,BRN,2022,1,,NATIONAL,M12,
+MMR,BRN,2022,2,,NATIONAL,M18,
+MMR,BTN,2022,1,,NATIONAL,M9,
+MMR,BTN,2022,2,,NATIONAL,M24,
+MR,BWA,2022,1,,NATIONAL,M9,
+MR,BWA,2022,2,,NATIONAL,M18,
+Measles,CAF,2022,1,,NATIONAL,M9,Survivants
+MMRV,CAN,2022,1,,SUBNATIONAL,M12,"Given in provinces/territories: x2 - M12, Y4-Y6 in MB; x2 - M12, M18 in AB, SK, QC (born after June 1, 2019), NB, NS,  PE, NL, NT, NU; x1 - Y4-Y6 in BC, ON, YT (2nd dose)"
+MMR,CAN,2022,1,,SUBNATIONAL,M12,"Given in provinces/territory: BC, ON, YT"
+MMRV,CAN,2022,2,,NATIONAL,M18-Y6,"Given in provinces/territories: x2 - M12, Y4-Y6 in MB; x2 - M12, M18 in AB, SK, QC (born after June 1, 2019), NB, NS,  PE, NL, NT, NU; x1 - Y4-Y6 in BC, ON, YT (2nd dose)"
+MMR,CHE,2022,1,,NATIONAL,M9,
+MMR,CHE,2022,2,,NATIONAL,M12,
+MMR,CHL,2022,1,,NATIONAL,Y1,
+MMR,CHL,2022,2,,NATIONAL,M36,
+MMR,CHN,2022,1,,NATIONAL,M8,
+MMR,CHN,2022,2,,NATIONAL,M18,
+MR,CIV,2022,1,,NATIONAL,M9,nourrissons survivants
+MR,CIV,2022,2,,NATIONAL,M15,nourrissons survivants
+MR,CMR,2022,1,,NATIONAL,M9,9-15 mois
+MR,CMR,2022,2,,NATIONAL,M15,9-15 mois
+Measles,COD,2022,1,,NATIONAL,M9,9-23 mois
+Measles,COD,2022,2,,NATIONAL,M15,9-23 mois
+MR,COG,2022,1,,NATIONAL,W36,9-18 mois
+MR,COG,2022,2,,NATIONAL,W60,9-18 mois
+MMR,COK,2022,1,HW,NATIONAL,,Booster for healthcare workers and frontliners
+MMR,COK,2022,1,,NATIONAL,M15,
+MMR,COK,2022,2,RISKGROUPS,NATIONAL,M6-M12,During measles outbreak at M6-M12
+MMR,COK,2022,2,,NATIONAL,Y4,
+MMR,COL,2022,1,,NATIONAL,Y1,
+MR,COL,2022,1,RISKGROUPS,NATIONAL,M6-Y59,"Los grupos a vacunar en en el país fueron: colombianos que van al exterior y solicitan la vacuna a libre demanda , así como en la detección de susceptibles de 11 a 49 o hasta 59 años, y durante las actividades de bloqueo, intensificación y barrido documentado en el proceso de control del brote de Sarampión, dosis cero población de 6 a 11 meses de edad, profesionales de la salud en el país."
+MR,COL,2022,1,HW,NATIONAL,,"Los grupos a vacunar en en el país fueron: colombianos que van al exterior y solicitan la vacuna a libre demanda , así como en la detección de susceptibles de 11 a 49 o hasta 59 años, y durante las actividades de bloqueo, intensificación y barrido documentado en el proceso de control del brote de Sarampión, dosis cero población de 6 a 11 meses de edad, profesionales de la salud en el país."
+MMR,COL,2022,2,,NATIONAL,Y5,
+MR,COM,2022,1,,NATIONAL,M9,9-23 mois
+MR,COM,2022,2,,NATIONAL,M18,9-23 mois
+MMR,CPV,2022,1,,NATIONAL,M9,Enfants
+MMR,CPV,2022,2,,NATIONAL,M15,Enfants
+MMR,CRI,2022,1,,NATIONAL,M15,
+MMR,CRI,2022,2,,NATIONAL,Y4,
+MMR,CUB,2022,1,,NATIONAL,Y1,
+MMR,CUB,2022,2,,NATIONAL,Y6,
+MMR,CUW,2019,1,,NATIONAL,M12,
+MMR,CUW,2019,2,,NATIONAL,M15,
+MMR,CYM,2022,1,,NATIONAL,M15,
+MMR,CYM,2022,2,,NATIONAL,M18,
+MMR,CYP,2022,1,,NATIONAL,M12-M15,
+MMR,CYP,2022,2,,NATIONAL,Y4-Y6,
+MMR,CZE,2022,1,,NATIONAL,M13,
+MMR,CZE,2022,2,,NATIONAL,Y5,
+MMR,DEU,2021,1,,NATIONAL,M11,"MMR and monovalent varicella immunization is preferable administered as two separate injections due to higher rates of febrile seizures following immunization with MMRV, MMRV is preferably administered as the second dose"
+MMR,DEU,2021,1,ADULTS,NATIONAL,,Adults born after 1970 without measles vaccination or just 1 documented dose in childhood
+MMR,DEU,2021,2,,NATIONAL,M15,"MMR and monovalent varicella immunization is preferable administered as two separate injections due to higher rates of febrile seizures following immunization with MMRV, MMRV is preferably administered as the second dose"
+MMRV,DEU,2021,2,,NATIONAL,M15,"MMR and monovalent varicella immunization is preferable administered as two separate injections due to higher rates of febrile seizures following immunization with MMRV, MMRV is preferably administered as the second dose"
+Measles,DJI,2022,1,,NATIONAL,M9,
+Measles,DJI,2022,2,,NATIONAL,M15,
+MMR,DMA,2022,1,,NATIONAL,M12,Children under 2 years
+MMR,DMA,2022,2,,NATIONAL,M18,Children under 2 years
+MMR,DNK,2022,1,,NATIONAL,M15,
+MMR,DNK,2022,1,RISKGROUPS,NATIONAL,>=Y18,"Recommended for all non-immune adults. Free of charge from April 1, 2018. Women of childbearing age not immune to Rubella demonstrated by antibody measurement. Given in the form of a single MFR."
+MMR,DNK,2022,2,,NATIONAL,Y4,
+MMR,DOM,2022,1,,NATIONAL,M12,
+MR,DOM,2022,1,RISKGROUPS,NATIONAL,>=Y2,2 años y más. Bloqueos alrededor de casos de EFE
+MMR,DOM,2022,2,,NATIONAL,M18,
+MMR,DZA,2022,1,,NATIONAL,M11,
+MMR,DZA,2022,2,,NATIONAL,M18,
+MR,DZA,2022,3,,NATIONAL,Y6,1ère année Primaire
+MMR,ECU,2022,1,,NATIONAL,M12,
+MMR,ECU,2022,1,RISKGROUPS,NATIONAL,Y2-Y7,Niños de dos a siete años de edad
+MR,ECU,2022,1,RISKGROUPS,NATIONAL,Y8-Y50,viajeros de 8 a 50 años de edad
+MMR,ECU,2022,2,,NATIONAL,M18,
+MMR,ECU,2022,2,RISKGROUPS,NATIONAL,0,Niños de dos a siete años de edad
+MMR,EGY,2022,1,,NATIONAL,M12,
+MMR,EGY,2022,2,,NATIONAL,M18,
+MR,ERI,2022,1,,NATIONAL,M9,9 months - 18 months
+MR,ERI,2022,2,,NATIONAL,M18,9 months - 18 months
+MMRV,ESP,2022,1,,SUBNATIONAL,M12-M15,Some regions administer MMRV instead of MMR and monovalent varicella
+MMR,ESP,2022,1,,SUBNATIONAL,M12,Some regions administer MMRV instead of MMR and monovalent varicella
+MMR,ESP,2022,2,,SUBNATIONAL,Y3-Y4,Some regions administer MMRV instead of MMR and monovalent varicella
+MMRV,ESP,2022,2,,SUBNATIONAL,Y3-Y4,Some regions administer MMRV instead of MMR and monovalent varicella
+MMR,EST,2022,1,,NATIONAL,Y1,
+MMR,EST,2022,1,RISKGROUPS,,,Close contacts of measles cases
+MMR,EST,2022,2,,NATIONAL,Y13,
+Measles,ETH,2022,1,,NATIONAL,M9,Surviving infants; 2nd year of life
+Measles,ETH,2022,2,,NATIONAL,M15,Surviving infants; 2nd year of life
+MMR,FIN,2022,1,,NATIONAL,M12,
+MMR,FIN,2022,2,,NATIONAL,Y6,Second dose is administered if child already has protection against varicella
+MMRV,FIN,2022,2,,NATIONAL,Y6,Administered if children also need protection against varicella
+MR,FJI,2022,1,,NATIONAL,M12,
+MR,FJI,2022,2,,NATIONAL,M18,
+MR,FJI,2022,3,,NATIONAL,Y6,
+MMR,FRA,2022,1,,NATIONAL,M12,
+MMR,FRA,2022,2,,NATIONAL,M18,
+MMR,FSM,2022,1,,NATIONAL,M12,
+MMR,FSM,2022,2,,NATIONAL,>=M13,
+Measles,GAB,2022,1,,NATIONAL,M9,Enfants survivants
+MMR,GBR,2022,1,,NATIONAL,Y1,
+MMR,GBR,2022,2,,NATIONAL,M40,
+MMR,GEO,2022,1,,NATIONAL,M12,
+MMR,GEO,2022,2,,NATIONAL,Y5,
+MR,GHA,2022,1,,NATIONAL,M9,
+MR,GHA,2022,2,,NATIONAL,M18,
+Measles,GIN,2022,1,,NATIONAL,M9,Enfants survivants
+Measles,GIN,2022,2,,NATIONAL,M18,Enfants survivants
+MR,GMB,2022,1,,NATIONAL,M9,
+MR,GMB,2022,2,,NATIONAL,M18,
+Measles,GNB,2022,1,,NATIONAL,M9,0-11 mois
+Measles,GNB,2022,2,,NATIONAL,M15-M23,0-11 mois
+Measles,GNQ,2022,1,,NATIONAL,M9,NIÑOS SUPERVIVIENTES Y DE 12 - 23 MESES
+Measles,GNQ,2022,2,,NATIONAL,M18,NIÑOS SUPERVIVIENTES Y DE 12 - 23 MESES
+MMR,GRC,2022,1,,NATIONAL,M12-M15,
+MMRV,GRC,2022,1,,NATIONAL,M12-M15,
+MMRV,GRC,2022,2,,NATIONAL,M24-M47,
+MMR,GRC,2022,2,,NATIONAL,M24-M47,
+MMR,GRD,2022,1,,NATIONAL,M12,1yr old
+MMR,GRD,2022,2,,NATIONAL,M18,1yr old
+MMR,GTM,2022,1,,NATIONAL,M12,
+MMR,GTM,2022,1,CATCHUP_C,NATIONAL,Y7-Y15,Recuperación de esquema entre 7 a 15 años y personas que viajan a países con casos de Sarampión
+MMR,GTM,2022,1,RISKGROUPS,NATIONAL,,Recuperación de esquema entre 7 a 15 años y personas que viajan a países con casos de Sarampión
+MR,GTM,2022,1,RISKGROUPS,NATIONAL,1st contact,"Estudiantes de escuelas formadoras en salud previo práctica hospitalaria, personal del ministerio en accciones operativas de supervisión y/o monitoreo, personal del sector turístico y red hotelera, comadronas, brigadas de salud militar, población migrante, cuerpos de socorro y personal de medios/instituciones que realiza visitas a centros de salud."
+MMR,GTM,2022,2,,NATIONAL,M18,
+MMR,GUM,2021,1,ADULTS,NATIONAL,Y19,
+MMR,GUM,2021,1,,NATIONAL,M12,
+MMR,GUM,2021,2,ADULTS,NATIONAL,0,
+MMR,GUM,2021,2,,NATIONAL,Y4-Y6,
+MMR,GUY,2022,1,,NATIONAL,M12,
+MMR,GUY,2022,2,,NATIONAL,M18,
+MMR,HKG,2022,1,,NATIONAL,M12,
+MMRV,HKG,2022,2,,NATIONAL,M18-Y6,"Children born on or after 1 Jul 2018 receive MMRV vaccine at 18 months old, and children born between 1 Jan 2013 and 30 Jun 2018 receive MMRV vaccine in Primary 1"
+MMR,HND,2022,1,,NATIONAL,M12,Población de 1 año y menor de 5 años
+MMR,HND,2022,1,RISKGROUPS,NATIONAL,>Y5,"Vacuna contra Sarampión, Rubéola y Parotiditis(Cepa Jeryl Lynn)  - Grupos en riesgo mayores de 5 años sin antecedente de haber padecido la enfermedad o de no haber sido vacunado."
+MMR,HND,2022,2,,NATIONAL,M18,Población de 1 año
+MMR,HRV,2022,1,,NATIONAL,M12,
+MMR,HRV,2022,2,,NATIONAL,Y7,
+MR,HTI,2022,1,,NATIONAL,M9,9-11 mois
+MR,HTI,2022,2,,NATIONAL,M12-M23,9-11 mois
+MMR,HUN,2022,1,,NATIONAL,M15,6th grade school campaign
+MMR,HUN,2022,2,,NATIONAL,Y11,6th grade school campaign
+MR,IDN,2022,1,,NATIONAL,M9,"Surviving Infant, toddler & 1st grade of elementary school"
+MR,IDN,2022,2,,NATIONAL,M18,"Surviving Infant, toddler & 1st grade of elementary school"
+MR,IDN,2022,3,,NATIONAL,Y7,"Surviving Infant, toddler & 1st grade of elementary school"
+MR,IND,2022,1,,NATIONAL,M9-M12,0-5 years
+MR,IND,2022,2,,NATIONAL,M16-M24,0-5 years
+MMR,IRL,2022,1,,NATIONAL,M12,
+MMR,IRL,2022,1,RISKGROUPS,NATIONAL,,"Risk groups, outbreaks"
+MMR,IRL,2022,1,HW,NATIONAL,,Health care workers
+MMR,IRL,2022,2,,NATIONAL,Y4-Y5,
+MMR,IRN,2022,1,,NATIONAL,M12,
+MR,IRN,2022,1,RISKGROUPS,NATIONAL,,outbreak response
+MMR,IRN,2022,2,,NATIONAL,M18,
+Measles,IRQ,2022,1,,NATIONAL,M9,
+MMR,IRQ,2022,1,,NATIONAL,M12,
+MMR,IRQ,2022,2,,NATIONAL,M18,
+MMR,ISL,2022,1,,NATIONAL,M18,
+MMR,ISL,2022,2,,NATIONAL,Y12,
+MMRV,ISR,2021,1,,NATIONAL,M12,
+MMRV,ISR,2021,2,,NATIONAL,Y6,
+MMRV,ITA,2022,1,RISKGROUPS,NATIONAL,,Risk groups
+MMRV,ITA,2022,1,,NATIONAL,M13-M15,
+MMRV,ITA,2022,1,HW,NATIONAL,,Health workers
+MMR,ITA,2022,1,,NATIONAL,M13-M15,
+MMR,ITA,2022,1,RISKGROUPS,NATIONAL,,Risk groups
+MMR,ITA,2022,1,HW,NATIONAL,,Health workers
+MMR,ITA,2022,2,,NATIONAL,Y5-Y6,
+MMRV,ITA,2022,2,,NATIONAL,Y5-Y6,
+MMR,JAM,2022,1,,NATIONAL,M12,Routine
+MMR,JAM,2022,2,,NATIONAL,M18,Routine
+MMR,JOR,2022,1,,NATIONAL,M12,
+Measles,JOR,2022,1,,NATIONAL,M9,
+MMR,JOR,2022,2,,NATIONAL,M18,
+MR,JPN,2022,1,,NATIONAL,Y1,
+MR,JPN,2022,2,,NATIONAL,Y5,
+MMR,KAZ,2022,1,,NATIONAL,Y1,
+MMR,KAZ,2022,2,,NATIONAL,Y6,
+MR,KEN,2022,1,,NATIONAL,M9,
+MR,KEN,2022,2,,NATIONAL,M18,
+MMR,KGZ,2022,1,,NATIONAL,M12,
+MMR,KGZ,2022,2,,NATIONAL,Y6,
+MR,KHM,2022,1,RISKGROUPS,NATIONAL,M6,For responding to outbreaks temporarily
+MR,KHM,2022,1,,NATIONAL,M9,
+MR,KHM,2022,2,,NATIONAL,M18,
+MR,KIR,2022,1,,NATIONAL,M12,
+MR,KIR,2022,2,,NATIONAL,Y6,
+MMR,KNA,2022,1,,NATIONAL,M12,
+MMR,KNA,2022,2,,NATIONAL,M18,
+MMR,KOR,2022,1,,NATIONAL,M12-M15,
+MMR,KOR,2022,2,,NATIONAL,Y4-Y6,
+MMR,KWT,2022,1,,NATIONAL,M12,
+MMR,KWT,2022,2,,NATIONAL,M24,
+MMR,KWT,2022,3,,NATIONAL,Y10-Y12,3rd dose at Y10-Y12 is for females
+MR,LAO,2022,1,,NATIONAL,M9,
+MR,LAO,2022,2,,NATIONAL,M12,
+Measles,LBN,2022,1,,NATIONAL,M9,
+MMR,LBN,2022,1,,NATIONAL,M12,
+MMR,LBN,2022,2,,NATIONAL,M18,
+Measles,LBR,2022,1,,NATIONAL,M9,9-59 months
+Measles,LBR,2022,2,,NATIONAL,M15,9-59 months
+MMR,LBY,2022,1,,NATIONAL,M12,
+MMR,LBY,2022,2,,NATIONAL,M18,
+MMR,LCA,2022,1,RISKGROUPS,NATIONAL,,Adolecents and adults with no evidence of vaccination history
+MMR,LCA,2022,1,,NATIONAL,M12,and to adolecents and adults with no evidence of vaccination history
+MMR,LCA,2022,2,,NATIONAL,M18,and to adolecents and adults with no evidence of vaccination history
+MMR,LKA,2022,1,,NATIONAL,M9,
+MMR,LKA,2022,2,,NATIONAL,Y3,
+MR,LSO,2022,1,,NATIONAL,M9,
+MR,LSO,2022,2,,NATIONAL,M18,
+MMR,LTU,2022,1,,NATIONAL,M15-M16,
+MMR,LTU,2022,2,,NATIONAL,Y6-Y7,
+MMRV,LUX,2022,1,,NATIONAL,M12,
+MMRV,LUX,2022,2,,NATIONAL,M15-M23,
+MMR,LVA,2022,1,,NATIONAL,M12-M15,
+MMR,LVA,2022,2,,NATIONAL,Y7,
+MMR,MAC,2022,1,,NATIONAL,M12,2nd dose of MMR is replaced by MMRV at 18 months of age from September 2018
+MMR,MAC,2022,1,RISKGROUPS,NATIONAL,>=Y18,Adults >=Y18 born in and after 1970 who have neither been infected with measles nor received one dose of measles vaccine after their 1st birthday. Non-immune health workers who have not received any measles vaccine after their 1st birthday. Full-time students enrolling in local higher education institutions for the first time who are not immune and have not received two doses of measles vaccine. Women of childbearing age (Y18-Y50) with no immune of rubella.
+MMR,MAC,2022,1,HW,NATIONAL,,Non-immune health workers who have not received any measles vaccine after their 1st birthday
+MMRV,MAC,2022,2,,NATIONAL,M18,2nd dose of MMR is replaced by MMRV at 18 months of age from September 2018
+MR,MAR,2019,1,,NATIONAL,M9,
+MR,MAR,2019,2,,NATIONAL,M18,
+MMR,MCO,2022,1,,NATIONAL,M12,
+MMR,MCO,2022,2,,NATIONAL,M16,
+MMR,MDA,2022,1,,NATIONAL,M12,
+MMR,MDA,2022,2,,NATIONAL,Y7,
+MMR,MDA,2022,3,,NATIONAL,Y15,
+Measles,MDG,2022,1,,NATIONAL,M9,0-18 mois
+Measles,MDG,2022,2,,NATIONAL,M15-M23,0-23 mois
+MR,MDV,2022,1,,NATIONAL,M9,All infants; MR is given as MCV1 at 9 months of age and MMR is given as MCV2 at 18 months of age
+MMR,MDV,2022,2,,NATIONAL,M18,All children aged 18 months; MR is given as MCV1 at 9 months of age and MMR is given as MCV2 at 18 months of age
+MR,MEX,2022,1,RISKGROUPS,NATIONAL,>=Y10,10 años y más sin antecedente vacunal
+MMR,MEX,2022,1,,NATIONAL,Y1,"Hasta el año 2027, para niñas y niños que cumplan 6 años de edad, el esquema de vacunación será: 1a dosis a los 12 meses de edad y la 2a dosis a los 6 años de edad. Para las cohortes de nacimiento a partir del año 2022, el esquema de vacunación será el siguiente: 1a dosis a los 12 meses de edad y 2a dosis a los 18 meses de edad"
+MMR,MEX,2022,2,,NATIONAL,M18-Y6,"Hasta el año 2027, para niñas y niños que cumplan 6 años de edad, el esquema de vacunación será: 1a dosis a los 12 meses de edad y la 2a dosis a los 6 años de edad. Para las cohortes de nacimiento a partir del año 2022, el esquema de vacunación será el siguiente: 1a dosis a los 12 meses de edad y 2a dosis a los 18 meses de edad"
+MMR,MHL,2022,1,,NATIONAL,M12,
+MMR,MHL,2022,2,,NATIONAL,M13,
+MMR,MKD,2022,1,,NATIONAL,M12,
+MMR,MKD,2022,2,,NATIONAL,Y6,
+Measles,MLI,2022,1,,NATIONAL,M9,enfants ayant survécus
+Measles,MLI,2022,2,,NATIONAL,M12-M23,enfants ayant survécus
+MMR,MLT,2022,1,,NATIONAL,M13,
+MMR,MLT,2022,2,,NATIONAL,Y3-Y4,
+MR,MMR,2022,1,,NATIONAL,M9,
+MR,MMR,2022,2,,NATIONAL,M18,
+MMR,MNE,2022,1,,NATIONAL,M13,
+MMR,MNE,2022,2,,NATIONAL,Y6,
+MMR,MNG,2022,1,,NATIONAL,M9,
+MMR,MNG,2022,2,,NATIONAL,Y2,
+MMR,MNP,2022,1,,NATIONAL,M12,
+MMRV,MNP,2022,1,,NATIONAL,M12,
+MMR,MNP,2022,2,,NATIONAL,Y4-Y6,
+MR,MOZ,2022,1,,NATIONAL,M9,Children less than 24 months
+MR,MOZ,2022,2,,NATIONAL,M18,Children less than 24 months
+MR,MRT,2022,1,,NATIONAL,M9,enfants de moins d'un an
+MMR,MSR,2022,1,,NATIONAL,M12,
+MMR,MSR,2022,2,,NATIONAL,M18,
+MMR,MSR,2022,3,ADULTS,NATIONAL,Y25-Y35,
+MMR,MUS,2022,1,,NATIONAL,M9,
+MMR,MUS,2022,2,,NATIONAL,M17,
+MR,MWI,2022,1,,NATIONAL,M9,
+MR,MWI,2022,2,,NATIONAL,M15,
+Measles,MYS,2022,1,,SUBNATIONAL,M6,Sabah state only
+MMR,MYS,2022,1,,NATIONAL,M9,children born July 2015 onwards
+MMR,MYS,2022,2,,NATIONAL,M12,children born July 2015 onwards
+MR,MYS,2022,2,,NATIONAL,Y7,For children born before July 2015 only
+MR,NAM,2022,1,,NATIONAL,M9,
+MR,NAM,2022,2,,NATIONAL,M15,
+MMR,NCL,2022,1,,NATIONAL,M12,
+MMR,NCL,2022,2,,NATIONAL,M16,
+Measles,NER,2022,1,,NATIONAL,M9,9-23 mois
+Measles,NER,2022,2,,NATIONAL,M16,9-23 mois
+Measles,NGA,2022,1,,NATIONAL,M9,surviving infants
+Measles,NGA,2022,2,,NATIONAL,M15,surviving infants
+MR,NIC,2022,1,RISKGROUPS,NATIONAL,,"Grupos de Riesgo como trabajadores de la salud, algunos personas adultas y trabajadores de embarcaciones, que no tiene documentada su vacuna de la niñez y estar vacunado contra sarampión es un requisito, se le aplica esta vacuna."
+MR,NIC,2022,1,HW,NATIONAL,,"Grupos de Riesgo como trabajadores de la salud, algunos personas adultas y trabajadores de embarcaciones, que no tiene documentada su vacuna de la niñez y estar vacunado contra sarampión es un requisito, se le aplica esta vacuna."
+MMR,NIC,2022,1,,NATIONAL,M12,Grupo de 1 año
+MMR,NIC,2022,2,,NATIONAL,M18,Grupo de 1 año
+MMR,NIU,2022,1,,NATIONAL,M15,
+MMR,NIU,2022,2,,NATIONAL,Y4,
+MMR,NLD,2022,1,,NATIONAL,M14,
+MMR,NLD,2022,2,,NATIONAL,Y9,
+MMR,NOR,2022,1,,NATIONAL,M15,
+MMR,NOR,2022,2,,NATIONAL,Y11,
+MR,NPL,2022,1,,NATIONAL,M9,<1 year and 12-23 months
+MR,NPL,2022,2,,NATIONAL,M15,<1 year and 12-23 months
+MR,NRU,2021,1,,NATIONAL,M12,
+MR,NRU,2021,2,,NATIONAL,M15,
+MMR,NZL,2022,1,,NATIONAL,M12,Changed from M15/Y4 in 2020
+MMR,NZL,2022,1,RISKGROUPS,NATIONAL,,Adults susceptible to one of MMR; no documented measles lgG anitbody; revaccination after immunosuppression
+MMR,NZL,2022,2,,NATIONAL,M15,Changed from M15/Y4 in 2020
+MMR,OMN,2022,1,,NATIONAL,M12,
+MMR,OMN,2022,2,,NATIONAL,M18,
+MMR,OMN,2022,3,ADULTS,NATIONAL,>Y34,post partum
+MR,PAK,2022,1,,NATIONAL,M9,Surviving infants
+MR,PAK,2022,2,,NATIONAL,M15,Surviving infants
+MR,PAN,2021,1,RISKGROUPS,NATIONAL,>Y19,"MAYORES DE 19 AÑOS, PUERPERAS, MEF"
+MMR,PAN,2021,1,,NATIONAL,M12,Hasta los 19 años
+MMR,PAN,2021,2,,NATIONAL,M18,Hasta los 19 años
+MMR,PER,2022,1,,NATIONAL,M12,
+MMR,PER,2022,2,,NATIONAL,M18,
+MR,PHL,2022,1,,NATIONAL,Y5-Y6,"School based immunization, all Grade 1 and Grade 7 students shall receive another dose of MCV vaccines in the form of MR. In 2021, SBI was turned into community-based and hence the target was shifted to age groups 5-6 and 12-13 years old"
+MMR,PHL,2022,1,,NATIONAL,M9,
+MMR,PHL,2022,2,,NATIONAL,M12-M15,
+MR,PHL,2022,2,,NATIONAL,Y12-Y13,"School based immunization, all Grade 1 and Grade 7 students shall receive another dose of MCV vaccines in the form of MR. In 2021, SBI was turned into community-based and hence the target was shifted to age groups 5-6 and 12-13 years old"
+MMR,PLW,2022,1,,NATIONAL,M12,
+MMR,PLW,2022,2,,NATIONAL,M15,
+MR,PNG,2022,1,,NATIONAL,M9,
+MR,PNG,2022,2,,NATIONAL,M18,
+MR,PNG,2022,3,,NATIONAL,Y7,School vaccination at entry
+MR,PNG,2022,4,,NATIONAL,Y13,School vaccination at exit
+MMR,POL,2021,1,,NATIONAL,M13-M15,
+MMR,POL,2021,2,,NATIONAL,Y6,
+Measles,PRK,2022,1,,NATIONAL,M9,
+MR,PRK,2022,1,,NATIONAL,M9,
+MR,PRK,2022,2,,NATIONAL,M15,
+MMR,PRT,2022,1,,NATIONAL,M12,
+MMR,PRT,2022,1,RISKGROUPS,NATIONAL,,Travellers
+MMR,PRT,2022,1,HW,NATIONAL,,Healthcare workers
+MMR,PRT,2022,2,,NATIONAL,Y5,
+MMR,PRY,2022,1,,NATIONAL,Y1,"Para disminuir el cúmulo de susceptibles frente al virus del sarampión y la rubeola, de acuerdo al proveedor actual se puede administrar hasta los 10 años de edad dependiendo del antecedente de vacunación."
+MR,PRY,2022,1,RISKGROUPS,NATIONAL,1st contact,"Para la inmunización activa contra el sarampión y rubéola en bebés, niños, adolescentes y adultos jóvenes en riesgo. A partir de los 11 años de edad podrá ser administrada la vacuna doble viral en aquellas personas que no cuenten con antecedente de vacunación previa con 2 dosis de SPR, debido a que la vacuna Triple viral forma parte del esquema de vacunación nacional en edades de 1 y 4 años y puede ser administrada hasta los 10 años de edad de acuerdo al proveedor actual. La vacuna SR se aplicará como alternativa cuando no haya disponibilidad de la vacuna SPR; la primera a los 12 meses y la segunda a los 4 años."
+MR,PRY,2022,2,RISKGROUPS,NATIONAL,0,"Para la inmunización activa contra el sarampión y rubéola en bebés, niños, adolescentes y adultos jóvenes en riesgo. A partir de los 11 años de edad podrá ser administrada la vacuna doble viral en aquellas personas que no cuenten con antecedente de vacunación previa con 2 dosis de SPR, debido a que la vacuna Triple viral forma parte del esquema de vacunación nacional en edades de 1 y 4 años y puede ser administrada hasta los 10 años de edad de acuerdo al proveedor actual. La vacuna SR se aplicará como alternativa cuando no haya disponibilidad de la vacuna SPR; la primera a los 12 meses y la segunda a los 4 años."
+MMR,PRY,2022,2,,NATIONAL,Y4,"Para disminuir el cúmulo de susceptibles frente al virus del sarampión y la rubeola, de acuerdo al proveedor actual se puede administrar hasta los 10 años de edad dependiendo del antecedente de vacunación."
+MMR,PSE,2022,1,,NATIONAL,M12,
+MMR,PSE,2022,2,,NATIONAL,M18,
+MMR,PYF,2022,1,,NATIONAL,M12,
+MMR,PYF,2022,2,,NATIONAL,M18,
+MMR,QAT,2022,1,,NATIONAL,M12,
+MMR,QAT,2022,2,,NATIONAL,M18,
+MMR,ROU,2022,1,,NATIONAL,M12,
+MMR,ROU,2022,2,,NATIONAL,Y5,
+Measles,RUS,2022,1,,NATIONAL,M12,"? ?????????? ? ????????? ? ?????? ????????????? ????????? ???????????????? ????????, ????? ??????????? ? ?????? ?????????????? ??????? ???????????, ?? ? ???, ??????? ????? ?????????? ??? ?? ???????? ???????????? ???????, ??? ? ?? ???????????? ????????."
+Measles,RUS,2022,1,RISKGROUPS,NATIONAL,Y36-Y55,"? 18-35 ???, ? 36 ?? 55 ?????? ?????"
+MM,RUS,2022,1,,NATIONAL,M12,"? ?????????? ? ????????? ? ?????? ????????????? ????????? ???????????????? ????????, ????? ??????????? ? ?????? ?????????????? ??????? ???????????, ?? ? ???, ??????? ????? ?????????? ??? ?? ???????? ???????????? ???????, ??? ? ?? ???????????? ????????."
+MMR,RUS,2022,1,,NATIONAL,M12,"? ?????????? ? ????????? ? ?????? ????????????? ????????? ???????????????? ????????, ????? ??????????? ? ?????? ?????????????? ??????? ???????????, ?? ? ???, ??????? ????? ?????????? ??? ?? ???????? ???????????? ???????, ??? ? ?? ???????????? ????????."
+MMR,RUS,2022,2,,NATIONAL,Y6,"? ?????????? ? ????????? ? ?????? ????????????? ????????? ???????????????? ????????, ????? ??????????? ? ?????? ?????????????? ??????? ???????????, ?? ? ???, ??????? ????? ?????????? ??? ?? ???????? ???????????? ???????, ??? ? ?? ???????????? ????????."
+MM,RUS,2022,2,,NATIONAL,Y6,"? ?????????? ? ????????? ? ?????? ????????????? ????????? ???????????????? ????????, ????? ??????????? ? ?????? ?????????????? ??????? ???????????, ?? ? ???, ??????? ????? ?????????? ??? ?? ???????? ???????????? ???????, ??? ? ?? ???????????? ????????."
+Measles,RUS,2022,2,,NATIONAL,Y6,"? ?????????? ? ????????? ? ?????? ????????????? ????????? ???????????????? ????????, ????? ??????????? ? ?????? ?????????????? ??????? ???????????, ?? ? ???, ??????? ????? ?????????? ??? ?? ???????? ???????????? ???????, ??? ? ?? ???????????? ????????."
+Measles,RUS,2022,3,ADULTS,NATIONAL,Y18-Y35,"? 18-35 ???, ? 36 ?? 55 ?????? ?????"
+MR,RWA,2022,1,,NATIONAL,M9,Surviving enfant
+MR,RWA,2022,2,,NATIONAL,M15,Surviving enfant
+MMR,SAU,2022,1,RISKGROUPS,NATIONAL,Y18,Premarital and postnatal females (+30 days)
+MMR,SAU,2022,1,,NATIONAL,M12,
+Measles,SAU,2022,1,,NATIONAL,M9,
+MMR,SAU,2022,2,,NATIONAL,M18,
+MMR,SAU,2022,2,RISKGROUPS,NATIONAL,CATCHUP_A,Premarital and postnatal females (+30 days)
+MMR,SAU,2022,3,,NATIONAL,Y4-Y6,
+Measles,SDN,2021,1,,NATIONAL,M9,Surviving infants
+Measles,SDN,2021,2,,NATIONAL,M18,Surviving infants
+MR,SEN,2022,1,,NATIONAL,M9,
+MR,SEN,2022,2,,NATIONAL,M15,
+MMR,SGP,2019,1,CATCHUP_C,NATIONAL,,recommended for persons without evidence of immunity
+MMR,SGP,2019,1,,NATIONAL,M12,
+MMR,SGP,2019,2,,NATIONAL,M15-M18,
+MR,SLB,2022,1,,NATIONAL,M12,
+MR,SLB,2022,2,,NATIONAL,M18,
+MR,SLE,2022,1,,NATIONAL,M9,9-24 months
+MR,SLE,2022,2,,NATIONAL,M15,9-24 months
+MMR,SLV,2022,1,,NATIONAL,M12,
+MMR,SLV,2022,2,,NATIONAL,M15-M18,
+MMR,SMR,2022,1,,NATIONAL,M15,
+MMR,SMR,2022,2,,NATIONAL,Y6,
+Measles,SOM,2022,1,,NATIONAL,M9,<1 year
+Measles,SOM,2022,2,,NATIONAL,M15,<1 year
+MMR,SRB,2022,1,,NATIONAL,M12,>12M
+MMR,SRB,2022,1,HW,NATIONAL,,Healthcare workers
+MMR,SRB,2022,2,,NATIONAL,Y7,>12M
+Measles,SSD,2022,1,,NATIONAL,M9,0-11 months
+MR,STP,2021,1,,NATIONAL,M9,9-18 mois
+MR,STP,2021,2,,NATIONAL,M18,9-18 mois
+MMR,SUR,2022,1,,NATIONAL,M12,
+MMR,SUR,2022,2,,NATIONAL,M18,
+MMR,SVK,2022,1,,NATIONAL,M14,
+MMR,SVK,2022,2,,NATIONAL,Y4,
+MMR,SVN,2022,1,,NATIONAL,M11-M18,
+MMR,SVN,2022,1,RISKGROUPS,NATIONAL,,Epidemiological indication
+MMR,SVN,2022,2,,NATIONAL,Y5,
+MMR,SWE,2022,1,,NATIONAL,M18,
+MMR,SWE,2022,2,,NATIONAL,Y6-Y8,
+MR,SWZ,2022,1,,NATIONAL,M9,9 - 59 M
+MR,SWZ,2022,2,,NATIONAL,M18,9 - 59 M
+MMR,SXM,2019,1,,NATIONAL,Y1,
+MMR,SXM,2019,2,,NATIONAL,Y4,
+MMR,SYC,2022,1,,NATIONAL,M15,
+MR,SYC,2022,1,ADULTS,NATIONAL,,whole population
+MMR,SYC,2022,2,,NATIONAL,Y6,
+MMR,SYR,2022,1,,NATIONAL,M12,
+MMR,SYR,2022,2,,NATIONAL,M18,
+MMR,TCA,2022,1,,NATIONAL,Y1,
+MMR,TCA,2022,2,,NATIONAL,Y3,
+Measles,TCD,2022,1,,NATIONAL,M9,0-23 mois
+Measles,TCD,2022,2,,NATIONAL,Y1.3,0-23 mois
+MR,TGO,2022,1,,NATIONAL,M9,enfants 9-23 mois
+MR,TGO,2022,2,,NATIONAL,M15,enfants 9-23 mois
+MR,THA,2022,1,HW,NATIONAL,,Healthcare workers and all University students of first-year in Faculty of Medical and Public Health
+MMR,THA,2022,1,,NATIONAL,M9,
+MMR,THA,2022,2,,NATIONAL,Y1.5,
+MMR,TJK,2022,1,,NATIONAL,M12,???? 1 ???? ? ? 6 ???
+MMR,TJK,2022,2,,NATIONAL,Y6,???? 1 ???? ? ? 6 ???
+MMR,TKL,2021,1,,NATIONAL,M12,
+MMR,TKL,2021,2,,NATIONAL,M15,
+MMR,TKM,2022,1,,NATIONAL,M12-M15,
+MMR,TKM,2022,2,,NATIONAL,Y6,
+MR,TLS,2022,1,,NATIONAL,M9,U2Y
+MR,TLS,2022,2,,NATIONAL,M18,U2Y
+MR,TON,2022,1,,NATIONAL,M12,
+MR,TON,2022,2,,NATIONAL,M18,
+MMR,TTO,2022,1,,NATIONAL,M12,
+MMR,TTO,2022,2,,NATIONAL,Y2,
+MR,TUN,2022,1,,NATIONAL,M12,
+MR,TUN,2022,2,,NATIONAL,M18,
+MMR,TUR,2022,1,,NATIONAL,M12,12 months and 48 months old infants
+MMR,TUR,2022,2,,NATIONAL,M48,12 months and 48 months old infants
+MR,TUV,2022,1,,NATIONAL,M12,Up to 14 years
+MR,TUV,2022,2,,NATIONAL,M18,Up to 14 years
+MR,TZA,2022,1,,NATIONAL,M9,under 2 years
+MR,TZA,2022,2,,NATIONAL,M18,under 2 years
+MR,UGA,2022,1,,NATIONAL,M9,9-11 months
+MR,UGA,2022,2,,NATIONAL,M18,9-11 months
+MMR,UKR,2022,1,,NATIONAL,M12,
+MMR,UKR,2022,2,,NATIONAL,Y6,
+MMR,URY,2022,1,,NATIONAL,M12,
+MMR,URY,2022,2,,NATIONAL,M15,
+MMR,USA,2022,1,,NATIONAL,M12,
+MMRV,USA,2022,1,,NATIONAL,M12,
+MMRV,USA,2022,2,,NATIONAL,Y4,
+MMR,USA,2022,2,,NATIONAL,Y4,
+MMR,UZB,2022,1,,NATIONAL,M12,???? 12 ??????? ? 6 ???
+MMR,UZB,2022,2,,NATIONAL,Y6,???? 12 ??????? ? 6 ???
+MMR,VCT,2022,1,,NATIONAL,M12,
+MR,VCT,2022,1,RISKGROUPS,NATIONAL,,Adults (like seafarers going to study)
+MR,VCT,2022,1,ADULTS,NATIONAL,,Adults (like seafarers going to study)
+MR,VCT,2022,1,,NATIONAL,>Y10,
+MMR,VCT,2022,2,,NATIONAL,M18,
+MMR,VEN,2021,1,,NATIONAL,M12,"12 MESES , 18 MESES, UNA DOSIS A VIAJEROS INTERNACIONALES."
+MMR,VEN,2021,1,RISKGROUPS,NATIONAL,,UNA DOSIS A VIAJEROS INTERNACIONALES.
+MMR,VEN,2021,2,,NATIONAL,M18,"12 MESES , 18 MESES, UNA DOSIS A VIAJEROS INTERNACIONALES."
+MMR,VGB,2022,1,HW,NATIONAL,,HCW
+MMR,VGB,2022,1,,NATIONAL,M12,
+MMR,VGB,2022,2,,NATIONAL,M15,
+Measles,VNM,2022,1,,NATIONAL,M9,
+MR,VNM,2022,2,,NATIONAL,M18,
+MR,VUT,2022,1,,NATIONAL,M12,
+MMR,WLF,2019,1,,NATIONAL,M12,
+MMR,WLF,2019,2,,NATIONAL,M16,
+MMR,WSM,2022,1,,NATIONAL,M9,Infants under two years
+MMR,WSM,2022,2,,NATIONAL,M15,Infants under two years
+MMR,XKX,2022,1,,NATIONAL,M12,
+MMR,XKX,2022,2,,NATIONAL,Y6-Y7,
+MR,YEM,2022,1,,NATIONAL,M9,9 months - 7 years
+MR,YEM,2022,2,,NATIONAL,M18,9 months - 7 years
+MR,YEM,2022,3,,NATIONAL,Y5-Y7,9 months - 7 years
+Measles,ZAF,2022,1,,NATIONAL,M6,<13 Month population
+Measles,ZAF,2022,2,,NATIONAL,M12,<13 Month population
+MR,ZMB,2022,1,,NATIONAL,M9,Surviving infants
+MR,ZMB,2022,2,,NATIONAL,M18,Surviving infants
+MR,ZWE,2022,1,,NATIONAL,M9,<Y2
+MR,ZWE,2022,2,,NATIONAL,M18,<Y2

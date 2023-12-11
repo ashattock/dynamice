@@ -7,7 +7,7 @@
 ###########################################################
 
 # ---------------------------------------------------------
-# Prepare coverage data by splitting into routine and SIA
+# Parent function for all preparation processes
 # ---------------------------------------------------------
 run_prepare = function() {
   
@@ -16,7 +16,17 @@ run_prepare = function() {
   
   message("* Preparing model resources")
   
-  # ---- Prepare coverage files ----
+  # Prepare coverage files
+  prepare_coverage()
+
+  # Prepare raw vaccine schedule data
+  prepare_schedule()
+}
+
+# ---------------------------------------------------------
+# Prepare coverage data by splitting into routine and SIA
+# ---------------------------------------------------------
+prepare_coverage = function() {
   
   # Function for constructing file paths
   get_path = function(x)
@@ -62,6 +72,56 @@ run_prepare = function() {
     fwrite(routine_dt, file = get_path("routine"))
     fwrite(sia_dt,     file = get_path("sia"))
   }
+}
+
+# ---------------------------------------------------------
+# Prepare routine vaccine schedule data by country
+# ---------------------------------------------------------
+prepare_schedule = function() {
+  
+  unit_dict = data.table(
+    unit = c("Y", "M", "W"), 
+    mult = c(52, 52/12, 1))
+  
+  unit_exp = paste(unit_dict$unit, collapse = ",")
+  unit_exp = paste0("[", unit_exp, "]")
+  
+  schedule_file = "vaccination_schedule.csv"
+  schedule_path = paste0(o$pth$input, schedule_file)
+  
+  schedule_dt = fread(schedule_path) %>%
+    # Retain general routine doses for countries of interest...
+    filter(country  %in% o$countries,
+           schedule %in% c(1, 2),
+           target_pop == "") %>%
+    # Parse age string into value and unit...
+    mutate(unit  = str_extract(age, unit_exp), 
+           value = str_extract(age, "[0-9]+")) %>%
+    replace_na(list(unit = mode(unit))) %>%
+    # Append multiplier to convert all ages to weeks...
+    left_join(y  = unit_dict, 
+              by = "unit") %>%
+    mutate(weeks = mult * as.numeric(value)) %>%
+    # Take the mean where we have multiple entires...
+    group_by(country, schedule) %>%
+    summarise(age = mean(weeks)) %>%
+    ungroup() %>%
+    # If over 3 years old, convert to annual increments...
+    mutate(age = ifelse(
+      test = age > 52 * 3, 
+      yes  = 52 * 3 + floor(age / 52 - 2), 
+      no   = age)) %>%
+    # ...
+    mutate(schedule = paste0("mcv", schedule)) %>%
+    pivot_wider(names_from  = schedule, 
+                values_from = age) %>%
+    # Tidy up...
+    arrange(country) %>%
+    as.data.table()
+  
+  # regional_mean = schedule_dt
+    
+  browser()
 }
 
 # ---------------------------------------------------------
