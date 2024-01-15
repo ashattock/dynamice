@@ -17,9 +17,15 @@ run_results = function() {
   
   message("* Producing results")
   
-  # Create output files for VIMC
-  if (o$do_vimc_files)
+  # Create main output files
+  if (o$do_output_files) {
+    
+    # Output files for VIMC
     vimc_output()
+    
+    # Output files for EPI50
+    epi50_output()
+  }
   
   # Plot coverage
   # if (o$plot_coverage)
@@ -81,6 +87,13 @@ vimc_output = function() {
                   values_from = "value") %>%
       as.data.table()
     
+    # Construct file name path to save to
+    save_name = paste1("total", scenario)
+    save_file = paste0(o$pth$results, save_name, ".csv")
+    
+    # Save all country results to file
+    fwrite(model_dt, file = save_file)
+    
     # Append model results to VIMC template
     output_dt = vimc_dt %>%
       left_join(y  = model_dt, 
@@ -98,6 +111,50 @@ vimc_output = function() {
   # ---- Uncertainty simulations ----
   
   # TODO: I'm not sure how LSHTM handle uncertainty
+}
+
+# ---------------------------------------------------------
+# Output for EPI50 analysis
+# ---------------------------------------------------------
+epi50_output = function() {
+  
+  message(" > Producing EPI50 output file")
+  
+  # Convert scenarios into named list
+  scen_list = o$scenarios %>%
+    setNames(c("no_vaccine", "vaccine")) %>%
+    as.list()
+  
+  # Function for loading results of given scenario
+  load_fn = function(ref) {
+    
+    # File name and path for loading
+    load_name = paste1("total", scen_list[[ref]])
+    load_file = paste0(o$pth$results, load_name, ".csv")
+    
+    # Load file and set to long format
+    result_dt = fread(load_file) %>%
+      select(country, year, age, deaths, dalys) %>%
+      mutate(scenario = ref, .before = 1)  %>%
+      pivot_longer(cols = c("deaths", "dalys"), 
+                   names_to  = "metric", 
+                   values_to = "value") %>%
+      arrange(country, year, age, metric) %>%
+      as.data.table()
+    
+    return(result_dt)
+  }
+  
+  # Apply loading function and format into single datatable
+  epi50_dt = names(scen_list) %>%
+    lapply(load_fn) %>%
+    rbindlist()
+  
+  # Construct file name path to save to
+  save_file = paste0(o$pth$output, "epi50_dynamice_results.rds")
+  
+  # Save results to file
+  saveRDS(epi50_dt, file = save_file)
 }
 
 # ---------------------------------------------------------

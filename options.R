@@ -79,8 +79,8 @@ set_options = function(do_step = NA, quiet = FALSE) {
   
   # ---- Results and plotting flags ----
   
-  # Produce main VIMC outputs
-  o$do_vimc_files = TRUE
+  # Produce main output files
+  o$do_output_files = TRUE
 
   # Turn figures on or off
   o$plot_coverage       = FALSE  # TODO: Not yet integrated

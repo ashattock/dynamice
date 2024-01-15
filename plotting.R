@@ -12,45 +12,54 @@ plot_burden_averted = function() {
   
   message(" > Plotting disease burden averted")
   
+  metric_dict = c(
+    deaths = "Deaths averted", 
+    dalys  = "DALYs averted")
+  
   # Load central results for all scenarios
   results_dt = load_central_results()
+  
+  # Load country-region details
+  regions_dt = fread(paste0(o$pth$config, "regions.csv"))
 
   # ---- Disease burden over time ----
   
   # Summarise over all ages
   burden_dt = results_dt %>%
-    group_by(country_name, scenario, year, metric) %>%
+    left_join(y  = regions_dt, 
+              by = "country") %>%
+    group_by(country_name, region, scenario, year, metric) %>%
     summarise(value = sum(value)) %>%
     ungroup() %>%
     arrange(metric, scenario, country_name, year) %>%
     as.data.table()
   
-  # Iterate through key metrics
-  for (metric in o$metrics) {
-    
-    # Subset for this metric
-    metric_dt = burden_dt %>%
-      filter(metric == !!metric)
-    
-    # Basic plot of disease burden over time
-    g = ggplot(metric_dt) +
-      aes(x = year, y = value, colour = scenario) +
-      geom_line() +
-      facet_wrap(~country_name, scales = "free_y") +
-      # Prettify y axis...
-      scale_y_continuous(
-        labels = comma)
-    
-    # Save figure to file
-    save_fig(g, "Disease burden", metric)
-  }
+  # # Iterate through key metrics
+  # for (metric in o$metrics) {
+  #   
+  #   # Subset for this metric
+  #   metric_dt = burden_dt %>%
+  #     filter(metric == !!metric)
+  #   
+  #   # Basic plot of disease burden over time
+  #   g = ggplot(metric_dt) +
+  #     aes(x = year, y = value, colour = scenario) +
+  #     geom_line() +
+  #     facet_wrap(~country_name, scales = "free_y") +
+  #     # Prettify y axis...
+  #     scale_y_continuous(
+  #       labels = comma)
+  #   
+  #   # Save figure to file
+  #   save_fig(g, "Disease burden", metric)
+  # }
   
   # ---- Cumulative disease burden averted over time ----
   
   # Metrics averted relative to baseline
   averted_dt = burden_dt %>%
     # First cumulatively sum over time...
-    group_by(country_name, scenario, metric) %>%
+    group_by(country_name, region, scenario, metric) %>%
     mutate(value = cumsum(value)) %>%
     ungroup() %>%
     # Take the difference to baseline...
@@ -61,44 +70,90 @@ plot_burden_averted = function() {
     filter(scenario != "nomcv") %>%
     as.data.table()
   
-  # Iterate through key metrics
-  for (metric in o$metrics) {
-    
-    # Subset for this metric
-    metric_dt = averted_dt %>%
-      filter(metric == !!metric)
-    
-    # Disease burden averted over time
-    g = ggplot(metric_dt) +
-      aes(x = year, y = value, colour = scenario) +
-      geom_line() +
-      facet_wrap(~country_name, scales = "free_y") +
-      # Prettify y axis...
-      scale_y_continuous(
-        labels = comma)
-    
-    # Save figure to file
-    save_fig(g, "Disease burden averted", metric)
-  }
+  # # Iterate through key metrics
+  # for (metric in o$metrics) {
+  #   
+  #   # Subset for this metric
+  #   metric_dt = averted_dt %>%
+  #     filter(metric == !!metric)
+  #   
+  #   # Disease burden averted over time
+  #   g = ggplot(metric_dt) +
+  #     aes(x = year, y = value, colour = scenario) +
+  #     geom_line() +
+  #     facet_wrap(~country_name, scales = "free_y") +
+  #     # Prettify y axis...
+  #     scale_y_continuous(
+  #       labels = comma)
+  #   
+  #   # Save figure to file
+  #   save_fig(g, "Disease burden averted", metric)
+  # }
   
   # ---- Total disease burden averted ----
   
   # Total impact over all countries
   total_dt = averted_dt %>%
-    group_by(scenario, year, metric) %>%
+    group_by(region, scenario, year, metric) %>%
     summarise(value = sum(value)) %>%
     ungroup() %>%
-    arrange(metric, scenario, year) %>%
+    # Pretiify metric names...
+    filter(metric %in% names(metric_dict)) %>%
+    mutate(metric = recode(metric, !!!metric_dict), 
+           metric = factor(metric, metric_dict)) %>%
+    arrange(metric, scenario, region, year) %>%
     as.data.table()
   
   # Total disease burden over time for all metrics
   g = ggplot(total_dt) +
-    aes(x = year, y = value, colour = scenario) +
-    geom_line() + 
-    facet_wrap(~metric, scales = "free_y") + 
+    aes(x = year, 
+        y = value, 
+        fill = region) +
+    geom_col() + 
+    # Set facets...
+    facet_wrap(
+      facets = vars(metric), 
+      scales = "free_y") +
+    # facet_grid(
+    #   rows = vars(scenario),
+    #   cols = vars(metric)) +
+    # Set colours and legend title...
+    # Set colour scheme...
+    scale_fill_manual(
+      name   = "Region", 
+      values = colour_scheme(
+        map = "brewer::paired", 
+        n   = n_unique(regions_dt$region))) +
+    # Prettify x axis...
+    scale_x_continuous(
+      limits = c(min(o$years), max(o$years)), 
+      expand = expansion(mult = c(0, 0)), 
+      breaks = seq(
+        from = min(o$years), 
+        to   = max(o$years), 
+        by   = 5)) +  
     # Prettify y axis...
     scale_y_continuous(
-      labels = comma)
+      labels = comma, 
+      expand = expansion(mult = c(0, 0.05)))
+  
+  # Prettify theme
+  g = g + theme_classic() + 
+    theme(axis.title    = element_blank(),
+          axis.text     = element_text(size = 10),
+          axis.text.x   = element_text(hjust = 1, angle = 50), 
+          axis.line     = element_blank(),
+          strip.text    = element_text(size = 20),
+          strip.background = element_blank(), 
+          panel.border  = element_rect(
+            linewidth = 0.5, fill = NA),
+          panel.spacing = unit(1, "lines"),
+          legend.title  = element_text(size = 20),
+          legend.text   = element_text(size = 16),
+          legend.key    = element_blank(),
+          legend.position = "right", 
+          legend.key.height = unit(2, "lines"),
+          legend.key.width  = unit(2, "lines"))
   
   # Save figure to file
   save_fig(g, "Disease burden averted total")

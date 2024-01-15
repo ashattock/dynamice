@@ -32,6 +32,9 @@ prepare_dirs = function(o) {
   pth$coverage = set_pth("input", "coverage")
 
   # ---- Output directories ----
+  
+  # Parent path for all output files
+  pth$output   = set_pth("output")
 
   # Path to model output, results, and figures
   pth$sims     = set_pth("output", "1_simulations")
