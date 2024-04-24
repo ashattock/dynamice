@@ -80,6 +80,16 @@ all_cpp_files = list.files(pattern = ".+\\.cpp$")
 for (file in all_cpp_files)
   sourceCpp(file)
 
+# ---- Redefine or unmask particular functions ----
+
+# Unmask certain commonly used functions
+select  = dplyr::select
+filter  = dplyr::filter
+rename  = dplyr::rename
+recode  = dplyr::recode
+count   = dplyr::count
+predict = stats::predict
+
 # ---- Clean up ----
 
 # Tidy up console after package loading

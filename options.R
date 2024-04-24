@@ -41,7 +41,7 @@ set_options = function(do_step = NA, quiet = FALSE) {
   o$fix_r0 = 15.9  # Set to NA to turn off
   
   # Vary R0 for uncertainty simulations
-  o$vary_r0 = seq(6, 26, 2)
+  o$vary_r0 = c(6, 26) # seq(6, 26, 2)
   
   # Disability for non-fatal case
   #

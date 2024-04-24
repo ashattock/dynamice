@@ -189,9 +189,9 @@ prepare_params = function(data) {
   dinf  = 14		# Duration of infection (days)
   
   # Age-dependent vaccine efficacy for first dose, based on a linear model (Hughes et al. 2020)
-  ve1_intcp = 0.64598  # Intercept of the linear model
-  ve1_slope = 0.01485  # Slope of the linear model, per month of age
-  ve2plus   = 0.98     # Vaccine efficacy for two and more doses
+  ve1_intcp = 0.70  # Intercept of the linear model
+  ve1_slope = 0.02  # Slope of the linear model, per month of age
+  ve2plus   = 0.98  # Vaccine efficacy for two and more doses
   
   # First dose efficacy by age
   age_ve1 = ve1_intcp + ve1_slope * 12 * c(1:(3*52)/52, 4:101)  # Based on age in months
@@ -357,29 +357,14 @@ impute_missing_data = function(ref, all_data, country) {
   # Check data reference
   if (ref == "timeliness") {
     
-    # Retain ordering
-    order_dt = all_data %>%
-      select(age, timeliness) %>%
-      unique()
-    
-    # Mean of countries in region
-    mean_data = all_data %>%
-      left_join(y  = region_dt, 
-                by = "country") %>%
-      filter(region == !!region) %>%
-      group_by(age, timeliness) %>%
-      summarise(prop_final_cov = mean(prop_final_cov)) %>%
-      ungroup() %>%
-      as.data.table()
-    
-    # Join mean to original ordering
+    # Assume prompt timeliness
     this_data = all_data %>%
       select(age, timeliness) %>%
       unique() %>%
-      left_join(y  = mean_data, 
-                by = c("age", "timeliness")) %>%
-      mutate(country = country) %>%
-      select(all_of(names(all_data)))
+      mutate(country = country, 
+             .before = 1) %>%
+      mutate(prop_final_cov = 
+               ifelse(is.na(age), 1, NA))
   }
   
   # ---- Life expectancy ----
@@ -405,19 +390,11 @@ impute_missing_data = function(ref, all_data, country) {
   # Check data reference
   if (ref == "population") {
     
-    warning("Population data needs to be updated for new countries")
-    
-    # Mean of countries in region
+    # Assume trivial
     this_data = all_data %>%
-      left_join(y  = region_dt, 
-                by = "country") %>%
-      filter(region == !!region) %>%
-      group_by(age_from, age_to, year, gender) %>%
-      summarise(value = mean(value)) %>%
-      ungroup() %>%
-      mutate(country = country) %>%
-      select(all_of(names(all_data))) %>%
-      as.data.table()
+      mutate(country = !!country, 
+             value   = 0) %>%
+      unique()
   }
   
   # ---- Contact rate ----

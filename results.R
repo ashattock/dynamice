@@ -19,10 +19,10 @@ run_results = function() {
   
   # Create main output files
   if (o$do_output_files) {
-    
+
     # Output files for VIMC
     vimc_output()
-    
+
     # Output files for EPI50
     epi50_output()
   }
@@ -80,8 +80,7 @@ vimc_output = function() {
     
     # Central results for this scenario 
     model_dt = results_dt %>%
-      filter(scenario == !!scenario, 
-             is.na(r0)) %>%  # This identifies central estimate
+      filter(is.na(r0)) %>%  # This identifies central estimate
       select(-scenario, -r0) %>%
       pivot_wider(names_from  = "metric", 
                   values_from = "value") %>%

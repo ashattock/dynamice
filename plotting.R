@@ -8,116 +8,57 @@
 # ---------------------------------------------------------
 # Plot deaths and DALYs averted over time
 # ---------------------------------------------------------
-plot_burden_averted = function() {
+plot_burden_averted = function(display_total = FALSE) {
   
   message(" > Plotting disease burden averted")
   
+  # Metric dictionary used for pretty plotting
   metric_dict = c(
     deaths = "Deaths averted", 
     dalys  = "DALYs averted")
   
-  # Load central results for all scenarios
-  results_dt = load_central_results()
+  # Load EPI50 results for all scenarios
+  epi50_dt = readRDS(paste0(o$pth$output, "epi50_dynamice_results.rds"))
   
   # Load country-region details
   regions_dt = fread(paste0(o$pth$config, "regions.csv"))
-
-  # ---- Disease burden over time ----
-  
-  # Summarise over all ages
-  burden_dt = results_dt %>%
-    left_join(y  = regions_dt, 
-              by = "country") %>%
-    group_by(country_name, region, scenario, year, metric) %>%
-    summarise(value = sum(value)) %>%
-    ungroup() %>%
-    arrange(metric, scenario, country_name, year) %>%
-    as.data.table()
-  
-  # # Iterate through key metrics
-  # for (metric in o$metrics) {
-  #   
-  #   # Subset for this metric
-  #   metric_dt = burden_dt %>%
-  #     filter(metric == !!metric)
-  #   
-  #   # Basic plot of disease burden over time
-  #   g = ggplot(metric_dt) +
-  #     aes(x = year, y = value, colour = scenario) +
-  #     geom_line() +
-  #     facet_wrap(~country_name, scales = "free_y") +
-  #     # Prettify y axis...
-  #     scale_y_continuous(
-  #       labels = comma)
-  #   
-  #   # Save figure to file
-  #   save_fig(g, "Disease burden", metric)
-  # }
-  
-  # ---- Cumulative disease burden averted over time ----
   
   # Metrics averted relative to baseline
-  averted_dt = burden_dt %>%
-    # First cumulatively sum over time...
-    group_by(country_name, region, scenario, metric) %>%
-    mutate(value = cumsum(value)) %>%
+  plot_dt = epi50_dt %>%
+    # Append regions...
+    left_join(y  = regions_dt, 
+              by = "country") %>%
+    # Summarise over region and age...
+    group_by(metric, scenario, region, year) %>%
+    summarise(value = sum(value)) %>%
     ungroup() %>%
     # Take the difference to baseline...
-    group_by(country_name, year, metric) %>%
-    mutate(averted = value[scenario == "nomcv"] - value) %>%
+    group_by(metric, region, year) %>%
+    mutate(averted = value[scenario == "no_vaccine"] - value) %>%
     ungroup() %>%
-    # Remove baseline scenario...
-    filter(scenario != "nomcv") %>%
-    as.data.table()
-  
-  # # Iterate through key metrics
-  # for (metric in o$metrics) {
-  #   
-  #   # Subset for this metric
-  #   metric_dt = averted_dt %>%
-  #     filter(metric == !!metric)
-  #   
-  #   # Disease burden averted over time
-  #   g = ggplot(metric_dt) +
-  #     aes(x = year, y = value, colour = scenario) +
-  #     geom_line() +
-  #     facet_wrap(~country_name, scales = "free_y") +
-  #     # Prettify y axis...
-  #     scale_y_continuous(
-  #       labels = comma)
-  #   
-  #   # Save figure to file
-  #   save_fig(g, "Disease burden averted", metric)
-  # }
-  
-  # ---- Total disease burden averted ----
-  
-  # Total impact over all countries
-  total_dt = averted_dt %>%
-    group_by(region, scenario, year, metric) %>%
-    summarise(value = sum(value)) %>%
+    filter(scenario != "no_vaccine") %>%
+    select(-scenario) %>%
+    # Cumulatively sum over time...
+    group_by(metric, region) %>%
+    mutate(cum_averted = cumsum(averted)) %>%
     ungroup() %>%
     # Pretiify metric names...
     filter(metric %in% names(metric_dict)) %>%
     mutate(metric = recode(metric, !!!metric_dict), 
            metric = factor(metric, metric_dict)) %>%
-    arrange(metric, scenario, region, year) %>%
+    arrange(metric, region, year) %>%
     as.data.table()
   
   # Total disease burden over time for all metrics
-  g = ggplot(total_dt) +
+  g = ggplot(plot_dt) +
     aes(x = year, 
-        y = value, 
+        y = cum_averted,  # Use averted or cum_averted
         fill = region) +
     geom_col() + 
     # Set facets...
     facet_wrap(
       facets = vars(metric), 
       scales = "free_y") +
-    # facet_grid(
-    #   rows = vars(scenario),
-    #   cols = vars(metric)) +
-    # Set colours and legend title...
     # Set colour scheme...
     scale_fill_manual(
       name   = "Region", 
@@ -126,8 +67,6 @@ plot_burden_averted = function() {
         n   = n_unique(regions_dt$region))) +
     # Prettify x axis...
     scale_x_continuous(
-      limits = c(min(o$years), max(o$years)), 
-      expand = expansion(mult = c(0, 0)), 
       breaks = seq(
         from = min(o$years), 
         to   = max(o$years), 
@@ -135,7 +74,8 @@ plot_burden_averted = function() {
     # Prettify y axis...
     scale_y_continuous(
       labels = comma, 
-      expand = expansion(mult = c(0, 0.05)))
+      expand = expansion(
+        mult = c(0, 0.05)))
   
   # Prettify theme
   g = g + theme_classic() + 
@@ -157,6 +97,23 @@ plot_burden_averted = function() {
   
   # Save figure to file
   save_fig(g, "Disease burden averted total")
+  
+  # ---- Display total impact ----
+  
+  # Check flag for display total impact
+  if (display_total == TRUE) {
+    
+    # Total number of deaths averted
+    total = plot_dt %>%
+      filter(metric == metric_dict[["deaths"]]) %>%
+      mutate(value = averted / 1e6) %>%
+      pull(value) %>%
+      sum() %>%
+      round(2)
+    
+    # Report key result to user
+    message("  - Total deaths averted: ", total, " million")
+  }
 }
 
 # ---------------------------------------------------------
